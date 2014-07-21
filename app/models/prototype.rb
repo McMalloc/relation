@@ -1,5 +1,5 @@
 class Prototype < ActiveRecord::Base
-  belongs_to :task
+  has_many :tasks, through: :project
   belongs_to :participant
   belongs_to :project
 end

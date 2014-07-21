@@ -1,6 +1,6 @@
 class CreatePass < ActiveRecord::Migration
   def change
-    create_table :pass do |t|
+    create_table :passes do |t|
       t.integer :tasktime
       t.decimal :sum
       t.decimal :satisfaction

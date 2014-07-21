@@ -3,6 +3,7 @@ class CreateTasks < ActiveRecord::Migration
     create_table :tasks do |t|
       t.string :name
       t.string :description
+      t.belongs_to :project
 
       t.timestamps
     end
