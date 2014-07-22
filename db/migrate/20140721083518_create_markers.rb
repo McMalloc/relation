@@ -4,7 +4,7 @@ class CreateMarkers < ActiveRecord::Migration
       t.string :code
       t.string :severity
       t.integer :position
-      t.belongs_to :recording
+      t.belongs_to :pass
       
       t.timestamps
     end

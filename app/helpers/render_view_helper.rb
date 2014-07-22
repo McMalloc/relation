@@ -1,0 +1,2 @@
+module RenderViewHelper
+end

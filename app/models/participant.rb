@@ -1,5 +1,5 @@
 class Participant < ActiveRecord::Base
-  has_many :tasks, through: :pass
-  has_many :pass
+  has_many :tasks, through: :passes
+  has_many :passes
   has_one :persona
 end

@@ -17,7 +17,7 @@ ActiveRecord::Schema.define(version: 20140721110147) do
     t.string   "code"
     t.string   "severity"
     t.integer  "position"
-    t.integer  "recording_id"
+    t.integer  "pass_id"
     t.datetime "created_at"
     t.datetime "updated_at"
   end
@@ -70,6 +70,7 @@ ActiveRecord::Schema.define(version: 20140721110147) do
   create_table "tasks", force: true do |t|
     t.string   "name"
     t.string   "description"
+    t.integer  "project_id"
     t.datetime "created_at"
     t.datetime "updated_at"
   end

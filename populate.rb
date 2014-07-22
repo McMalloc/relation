@@ -1,16 +1,57 @@
 # make Codes a table
+
 def generateSet()
-  Task.create( name: "Change your default signature")
-  Task.create( name: "Add an address to a mailing list" )
-  Task.create( name: "Create an appointment in a shared calendar" )
-  Task.create( name: "Export your address book" )
-  Task.create( name: "Restore a deleted draft" )
+  personas_arr = [
+    "Corporate power user",
+    "Freelance power user",
+    "Frequent use in administration",
+    "Moderate private use"
+    ]
+  personas_skill = [
+    (rand(70..100))/100.0,
+    (rand(60..80))/100.0,
+    (rand(40..65))/100.0,
+    (rand(30..50))/100.0
+    ]
 
-  Persona.create( moniker: "Corporate power user" )
-  Persona.create( moniker: "Freelance power user" )
-  Persona.create( moniker: "Frequent use in administration")
-  Persona.create( moniker: "Moderate private use" )
+  tasks_arr = [
+    "Change your default signature",
+    "Add an address to a mailing list",
+    "Create an appointment in a shared calendar",
+    "Export your address book",
+    "Restore a deleted draft"
+    ]
+  tasks_difficulty = [
+    (rand(50..60))/100.0,
+    (rand(40..50))/100.0,
+    (rand(70..90))/100.0,
+    (rand(50..80))/100.0,
+    (rand(40..60))/100.0 #/
+    ]
+  marker_arr = [
+    "ANGER",
+    "IRRITATION",
+    "LOST",
+    "CONFUSION",
+    "ANNOYANCE"
+    ]
+  
+  puts "tasks:"
+  puts tasks_difficulty
+  puts "skill:"
+  puts personas_skill
 
+  rdSat = RandomGaussian.new(3.5, 2)
+  rdSum = RandomGaussian.new(0.5, 0.2)
+
+  tasks_arr.each do |tsk|
+    Task.create( name: tsk )
+  end
+  
+  personas_arr.each do |pers|
+    Persona.create( moniker: pers )  
+  end
+  
   Participant.create( name: "Sophia", persona_id: 1 )
   Participant.create( name: "Phillipp", persona_id: 1 )
   Participant.create( name: "Karol", persona_id: 2 )
@@ -22,26 +63,44 @@ def generateSet()
   Participant.create( name: "Pablo", persona_id: 4 )
 
   Task.all.each do |t|
-    base_tasktime = rand(40..100)
-    difficulty = rand
+    difficulty = tasks_difficulty[tasks_arr.index(t.name)]
+    base_tasktime = rand(150..200)*difficulty
     Participant.all.each do |p|
+      skill = [personas_skill[p.persona_id - 1] + (rand(-10..10) / 50.0), 1].min.abs #/
+      passSum = rdSum.rand
+      passSat = [rdSat.rand, 5].min.abs
+      compl = difficulty < skill ? true : false
+      tt = compl ? base_tasktime + (rand(10..30) / skill) : base_tasktime + (rand(60..100) / skill)
       Pass.create( 
           task_id: t.id,
           participant_id: p.id,
-          sum: (1..100).to_a.sample/100.0, #/
-          tasktime: base_tasktime + rand(10..30),
-          satisfaction: rand(10..50)/10.0, #/
-          completed: difficulty < 0.2 ? true : false
+          sum: passSum,
+          tasktime: tt, #/
+          satisfaction: compl ? passSat : passSat*0.6, #/
+          completed: compl
         )
     end
   end
+  
+  Pass.all.each do |pss|
+    for i in pss.sum <0.5 ? 0..rand(3..6) : 0..rand(1..3) do
+      Marker.create(
+          code: marker_arr.sample,
+          severity: ["S0", "S1", "S2", "S3", "S4"].sample,
+          position: [0, pss.tasktime].sample,
+          pass_id: pss.id
+        )
+    end
+  end
+  
 end
 
 class RandomGaussian
+  attr_accessor :mean, :stddev
   def initialize(mean, stddev, rand_helper = lambda { Kernel.rand })
     @rand_helper = rand_helper
     @mean = mean
-    @stddev = stddev
+    @stddev = stddev    
     @valid = false
     @next = 0
   end
