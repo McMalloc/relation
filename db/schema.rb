@@ -36,6 +36,7 @@ ActiveRecord::Schema.define(version: 20140721110147) do
     t.boolean  "completed"
     t.integer  "task_id"
     t.integer  "participant_id"
+    t.integer  "prototype_id"
     t.datetime "created_at"
     t.datetime "updated_at"
   end

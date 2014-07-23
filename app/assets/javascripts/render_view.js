@@ -29,12 +29,12 @@ function renderView() {
       renderHeatmap(set.tiles, scale);
       //renderMarkerChart(markers, colorScale, lengthScale, reference);
   });
-};
+}
 
-function updateDimension() {
-	gridSize = parseInt((width-startX) / gridX); //blödsinn
+/*function updateDimension() {
+	gridSize = parseInt((width-startX) / gridX); //rubbish
 	height = gridY * gridSize + startY;
-};
+};*/
 
 function buildQuantitiveScale(grid) {
 	var mapper = d3.scale.quantize()
@@ -45,20 +45,20 @@ function buildQuantitiveScale(grid) {
 		return palette[mapper(domainValue)]; // closure TODO: really needed?
 	};
 	return scl;
-};
+}
 
 function buildQualitativeScale(markers) {
 	var mapper = d3.scale.ordinal()
 					.domain(markers)
 					.range(colorbrewer.Set2[markers.length]);
 	return mapper;
-};
+}
 
 function buildSpatialScale(markers) {
 	var sums = [];
 	markers.forEach(function(mrk_per_tsk, idx) {
 		sums[idx] = 0;
-		for (mrk in mrk_per_tsk) {
+		for (var mrk in mrk_per_tsk) {
 			sums[idx] = sums[idx] + mrk_per_tsk[mrk];
 		}
 	});
@@ -104,10 +104,10 @@ function quantify(markers, ref) {
         } else {
             cnt++;	
         }
-    };
+    }
     if (cnt > 0) {
         quantities[current] = cnt;
-    };
+    }
 	ref.forEach(function(d, i) {
 		if (!quantities.hasOwnProperty(d)) {
 			quantities[d] = 0;

@@ -7,6 +7,7 @@ class CreatePass < ActiveRecord::Migration
       t.boolean :completed
       t.belongs_to :task
       t.belongs_to :participant
+      t.belongs_to :prototype
       
       t.timestamps
     end

@@ -65,43 +65,60 @@ end
     "CONFUSION",
     "ANNOYANCE"
     ]
+  participants_arr = [
+    "Sophia", "Phillipp", "Karol", "Christian", "Mathias", "Stefanie", "Thorsten", "Leonie", "Pablo"
+    ]
+  participants_arr = [
+    "Peter", "Johannes", "Simone", "Junda", "Günther", "Hendrik", "Lars", "Astrid", "Allison"
+    ]
+  persona_distr = [
+    1,1,2,2,3,3,3,4,4
+    ]
 
   rdSat = RandomGaussian.new(3.5, 2)
   rdSum = RandomGaussian.new(0.5, 0.2)
 
+  project = Project.create name: "Redesign E-Mail-Client-Oberfläche", customer: "SW Holding GmbH"
+  
+  pA = project.prototypes.create moniker: "Klassisch"
+  pB = project.prototypes.create moniker: "Gewagt" 
+    
   tasks_arr.each do |tsk|
-    Task.create( name: tsk )
+    project.tasks.create name: tsk
   end
   
   personas_arr.each do |pers|
     Persona.create( moniker: pers )  
   end
   
-  Participant.create( name: "Sophia", persona_id: 1 )
-  Participant.create( name: "Phillipp", persona_id: 1 )
-  Participant.create( name: "Karol", persona_id: 2 )
-  Participant.create( name: "Christian", persona_id: 2 )
-  Participant.create( name: "Mathias", persona_id: 3 )
-  Participant.create( name: "Stefanie", persona_id: 3 )
-  Participant.create( name: "Thorsten", persona_id: 3 )
-  Participant.create( name: "Leonie", persona_id: 4 )
-  Participant.create( name: "Pablo", persona_id: 4 )
+  participants_arr.each do |part|
+    Participant.create( name: part, persona_id: persona_distr[participants_arr.index(part)] )
+  end
 
   Task.all.each do |t|
     difficulty = tasks_difficulty[tasks_arr.index(t.name)]
     base_tasktime = rand(150..200)*difficulty
     Participant.all.each do |p|
-      skill = [personas_skill[p.persona_id - 1] + (rand(-10..10) / 50.0), 1].min.abs #/
+      skill = [personas_skill[p.persona_id - 1] + (rand(-10..10) / 50.0), 1].min.abs 
       passSum = rdSum.rand
       passSat = [rdSat.rand, 5].min.abs
       compl = difficulty < skill ? true : false
       tt = compl ? base_tasktime + (rand(10..30) / skill) : base_tasktime + (rand(60..100) / skill)
-      Pass.create( 
+      pA.passes.create( 
           task_id: t.id,
           participant_id: p.id,
           sum: passSum,
-          tasktime: tt, #/
-          satisfaction: compl ? passSat : passSat*0.6, #/
+          tasktime: tt, 
+          satisfaction: compl ? passSat : passSat*0.6, 
+          completed: compl
+        )
+      compl = difficulty*0.9 < skill ? true : false
+      pB.passes.create( 
+          task_id: t.id,
+          participant_id: p.id,
+          sum: passSum,
+          tasktime: tt+rand(-20..10), 
+          satisfaction: compl ? passSat : passSat*0.6, 
           completed: compl
         )
     end
@@ -109,11 +126,10 @@ end
   
   Pass.all.each do |pss|
     for i in pss.sum <0.5 ? 0..rand(3..6) : 0..rand(1..3) do
-      Marker.create(
+      pss.markers.create(
           code: marker_arr.sample,
           severity: ["S0", "S1", "S2", "S3", "S4"].sample,
           position: [0, pss.tasktime].sample,
-          pass_id: pss.id
         )
     end
   end
