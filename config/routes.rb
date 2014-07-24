@@ -1,5 +1,8 @@
 Rails.application.routes.draw do
-  get '/render' => 'prototypes#heatmap'
+  get 'vis/heatmap' => 'prototypes#heatmap'
+  get 'vis/fetch/:prototype_id' => 'prototypes#fetch'
+  
+  #get 'vis/fetch/:prototype' => 'prototypes#fetch'
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".
 
