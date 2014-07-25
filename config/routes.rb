@@ -1,6 +1,6 @@
 Rails.application.routes.draw do
-  get 'vis/heatmap' => 'prototypes#heatmap'
-  get 'vis/fetch/:prototype_id' => 'prototypes#fetch'
+  get 'vis/heatmap' => 'render_view#heatmap'
+  get 'vis/:action/:controller/' # fetch route. pass the controller and its attributes as query string parameters to get a json response
   
   #get 'vis/fetch/:prototype' => 'prototypes#fetch'
   # The priority is based upon order of creation: first created -> highest priority.
