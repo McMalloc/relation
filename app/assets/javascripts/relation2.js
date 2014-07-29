@@ -128,9 +128,38 @@ function showDetail(idx, visible) {
 };
 
 function expandRect(rect) {
-  var factor = 10;
+  var factor = 5;
+  var offset = factor + parseInt(tilePadding/2);
+  console.log(offset);
+  var selection = d3.select(rect).transition().duration(125);
+  
   rect.parentNode.appendChild(rect); // move to the top!
-  var selection = d3.select(rect);
+  selection
+    .attr("width", gridSize + (factor*2))
+    .attr("height", gridSize + (factor*2))
+    .attr("x", function() { 
+      return parseInt(d3.select(rect).attr("x")) - offset; 
+    })
+    .attr("y", function() { 
+      return parseInt(d3.select(rect).attr("y")) - offset; 
+    });
+
+}
+
+function collapseRect(rect) {
+  var factor = 10;
+  var offset = factor + parseInt(tilePadding/2);
+  var selection = d3.select(rect).transition().duration(125);
+  console.log(offset);
+  selection
+    .attr("width", gridSize - tilePadding)
+    .attr("height", gridSize - tilePadding)
+    .attr("x", function() { 
+      return parseInt(d3.select(rect).attr("x")) + offset; 
+    })
+    .attr("y", function() { 
+      return parseInt(d3.select(rect).attr("y")) + offset; 
+    });
   
 }
 
@@ -154,12 +183,12 @@ function renderHeatmap(set, scale, vert, hor, parameter) {
       return d[parameter];
     })
     .on("mouseenter", function (d, i) {
-      expandRect(this);
+      //expandRect(this);
       showDetail(i, true);
     })
     .on("mouseout", function (d, i) {
       showDetail(i, false);
-      expandRect(this);
+      //collapseRect(this);
     }); // TODO: shows not all details, only data values
 
   labels = svgcanvas.selectAll("text").data(set).enter().append("text")
@@ -182,4 +211,4 @@ function renderHeatmap(set, scale, vert, hor, parameter) {
       return d[parameter];
     }); // TODO: label is not exact anymore, .data will suffice			
 };
-fetchAndRender('fetch/pass?prototype_id=1');
+fetchAndRender('fetch/pass?project_id=all&prototype_id=1&task_id=all&participant_id=all');

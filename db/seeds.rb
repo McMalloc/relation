@@ -129,7 +129,7 @@ end
       pss.markers.create(
           code: marker_arr.sample,
           severity: ["S0", "S1", "S2", "S3", "S4"].sample,
-          position: [0, pss.tasktime].sample,
+          position: [5, pss.tasktime].sample,
         )
     end
   end
