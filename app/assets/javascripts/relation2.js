@@ -104,7 +104,6 @@ function fetchAndRender(getRequest) {
 }
 
 function buildQuantitiveScale(array, parameter) {
-  console.dir(array);
   var mapper = d3.scale.quantize()
     .domain([Math.max.apply(Math, array.map(function (pass) {
       return pass[parameter];

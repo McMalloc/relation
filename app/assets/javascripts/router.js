@@ -1,5 +1,5 @@
 // For more information see: http://emberjs.com/guides/routing/
 
 Relation2.Router.map(function() {
-  // this.resource('posts');
+  this.route("heatmap", { path: "/vis/heatmap" });
 });

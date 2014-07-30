@@ -28,4 +28,8 @@ class PassController < ApplicationController
                           ]
                   )
   end
+  
+  def index
+    @passes = Pass.all
+  end
 end

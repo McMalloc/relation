@@ -1,0 +1,24 @@
+<% provide(:title, 'All passes') %>
+<h1>All passes, for all projects and prototypes</h1>
+
+<table>
+  <tr>
+    <th>ID</th>
+    <th>Task Time</th>
+    <th>Satisfaction</th>
+    <th># Markers</th>
+    <th>Participant</th>
+    <th>Task</th>
+  </tr>
+ 
+<% @passes.each do |pass| %>
+  <tr>
+    <td><%= pass.id %></td>
+    <td><%= pass.tasktime %></td>
+    <td><%= pass.satisfaction %></td>
+    <td><%=  %></td>
+    <td><%= pass.participant_id %></td>
+    <td><%= pass.task_id %></td>
+  </tr>
+<% end %>
+</table>

@@ -1,7 +1,8 @@
 <div class="row">
-  <div class="col-md-10 col-md-offset-1">
+  <div id="main" class="col-md-10 col-md-offset-1">
 
     <h1>Heatmap</h1>
+    
     <div class="btn-group">
       <button type="radio" id="show_tasktime" class="btn btn-default" checked>Visualize task time</button>
       <button type="radio" id="show_sum" class="btn btn-default">Visualize sum</button>
@@ -12,6 +13,16 @@
       <button type="radio" id="show_proto2" class="btn btn-default">Prototype B</button>
       <button type="radio" id="show_diff" class="btn btn-default">Compare A and B</button>
     </div>
+    
+    <script type="text/x-handlebars" data-template-name="application">
+      <ul>
+        {{view Ember.TextField valueBinding="newEntryName" action="addEntry"}}
+        <button class="btn" {{action addEntry}}>Add</button>
+        {{#each entries}}
+        <li>{{name}}</li>
+        {{/each}}
+      </ul>
+    </script>
     
   </div>
 </div>

@@ -22,6 +22,8 @@
 //= require ./relation2
 
 // for more details see: http://emberjs.com/guides/application/
-Relation2 = Ember.Application.create();
+Relation2 = Ember.Application.create({
+  rootElement: '#main'
+});
 
 //= require_tree .
