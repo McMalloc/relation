@@ -23,7 +23,14 @@
 
 // for more details see: http://emberjs.com/guides/application/
 Relation2 = Ember.Application.create({
-  rootElement: '#main'
+  rootElement: '#app-container',
+  LOG_TRANSITIONS: true
 });
 
 //= require_tree .
+
+Relation2.Dataset = Ember.Object.extend({
+  json: {},
+  scale: {},
+  properties: {}
+});

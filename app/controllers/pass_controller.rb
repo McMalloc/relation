@@ -11,22 +11,9 @@ class PassController < ApplicationController
     @participant_q  = params[:participant_id] == "all" ? "" 
                     : "participant_id = " + params[:participant_id]
     
-    puts "Query for Project: " + params[:project_id]
-    puts "Query for Prototype: " + params[:prototype_id]
-    puts "Query for Task: " + params[:task_id]
-    puts "Query for Participant: " + params[:participant_id]
-    puts "Pass.where " + @project_q + @prototype_q + @task_q + @participant_q
-    
     @passes_by_query = Pass.where(@project_q).where(@prototype_q).where(@task_q).where(@participant_q)
-    render json: @passes_by_query.as_json(
-                    only: [ :id, 
-                            :task_id, 
-                            :participant_id, 
-                            :tasktime, 
-                            :satisfaction, 
-                            :prototype_id
-                          ]
-                  )
+    render json: @passes_by_query
+    # find JASON definition in the serializer
   end
   
   def index

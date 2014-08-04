@@ -12,45 +12,17 @@
 
 var width = 1200;
 var height = 900;
-var startX = 10;
-var startY = 10;
+var startX = 0;
+var startY = 0;
 var gridSize = 96;
 var gridX = 0;
 var gridY = 0;
 var tilePadding = 3;
-var categories = 8;
+var categories = 9;
 var permanent_json;
 var jsons_and_scales = d3.map();
+var sets = [];
 var nSets = 0;
-
-jQuery(function () {
-  /*$('#show_tasktime').button();
-  $('#show_sum').button();
-  $('#show_satisfaction').button();
-  $('#show_proto1').button();
-  $('#show_proto2').button();
-  $('#show_diff').button();*/
-
-  $('#show_sum').on('click', function (e) {
-    changeParameter("markercount");
-  });
-  $('#show_tasktime').on('click', function (e) {
-    changeParameter("tasktime");
-  });
-  $('#show_satisfaction').on('click', function (e) {
-    changeParameter("satisfaction");
-  });
-
-  $('#show_proto1').on('click', function (e) {
-    changeSet("fetch/pass?prototype_id=1");
-  });
-  $('#show_proto2').on('click', function (e) {
-    changeSet("fetch/pass?prototype_id=2");
-  });
-  $('#show_diff').on('click', function (e) {
-    buildDiffMap(jsons_and_scales.get(0).set, jsons_and_scales.get(1).set, "tasktime");
-  });
-});
 
 function buildDiffMap(set1, set2, parameter) {
   var diffSet = set1.slice(0);
@@ -58,12 +30,9 @@ function buildDiffMap(set1, set2, parameter) {
     console.log(diffSet[index][parameter] + " = " + set1[index][parameter] + " - " + set2[index][parameter]);
     diffSet[index][parameter] = set1[index][parameter] - set2[index][parameter];
   });
-  console.dir(diffSet);
-  console.dir(set1);
-  console.dir(set2);
 }
 
-function changeSet(getRequest) {
+function swapSet(getRequest) {
   d3.json(getRequest, function (error, json) {
     permanent_json = json.pass;
     jsons_and_scales.set(nSets, {
@@ -74,7 +43,7 @@ function changeSet(getRequest) {
     heatmap.data(json.pass)
       .transition()
       .style("fill", function (d) {
-        return d3.rgb(scale(d["tasktime"]))
+        return d3.rgb(scale(d["tasktime"]));
       });
   });
 }
@@ -95,7 +64,7 @@ function fetchAndRender(getRequest) {
       scl: scale
     });
     nSets++;
-    svgcanvas = d3.select("body")
+    svgcanvas = d3.select("#app-container")
       .append("svg")
       .attr("width", width)
       .attr("height", height);
@@ -170,10 +139,10 @@ function renderHeatmap(set, scale, vert, hor, parameter) {
     .attr("rx", 3)
     .attr("ry", 3)
     .attr("x", function (d) {
-      return startX + (gridSize * d[hor]) + tilePadding;
+      return startX + (gridSize * (d[hor] - 1)) + tilePadding;
     })
     .attr("y", function (d) {
-      return startY + (gridSize * d[vert]) + tilePadding;
+      return startY + (gridSize * (d[vert] - 1)) + tilePadding;
     })
     .style("fill", function (d) {
       return d3.rgb(scale(d[parameter])); //d.data*255, d.data*255, d.data*255); 
@@ -183,13 +152,27 @@ function renderHeatmap(set, scale, vert, hor, parameter) {
     })
     .on("mouseenter", function (d, i) {
       //expandRect(this);
-      showDetail(i, true);
+      //showDetail(i, true);
     })
     .on("mouseout", function (d, i) {
-      showDetail(i, false);
+      //showDetail(i, false);
       //collapseRect(this);
     }); // TODO: shows not all details, only data values
-
+  
+  console.dir(set);
+  console.log(vert, hor);
+  
+  labels = svgcanvas.selectAll("text").data(set).enter().append("text")
+    .attr("width", gridSize)
+    .attr("height", gridSize)
+    .attr("x", function (d) {
+      return startX + (gridSize * (d[hor] - 1)) + tilePadding;
+    })
+    .attr("y", function (d) {
+      return startY + (gridSize * (d[vert] - 1)) + tilePadding;
+    })
+    .text();
+/*
   labels = svgcanvas.selectAll("text").data(set).enter().append("text")
     .attr("x", function (d) {
       return startX + 4 + (gridSize * d[hor]) + tilePadding;
@@ -209,5 +192,6 @@ function renderHeatmap(set, scale, vert, hor, parameter) {
     .text(function (d, i) {
       return d[parameter];
     }); // TODO: label is not exact anymore, .data will suffice			
+    */
 };
-fetchAndRender('fetch/pass?project_id=all&prototype_id=1&task_id=all&participant_id=all');
+//
