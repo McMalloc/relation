@@ -49,14 +49,20 @@ end
     "Add an address to a mailing list",
     "Create an appointment in a shared calendar",
     "Export your address book",
-    "Restore a deleted draft"
+    "Restore a deleted draft",
+    "Create a new IMAP account",
+    "Create a new task for a colleague",
+    "Add a domain to the spam black list"
     ]
   tasks_difficulty = [
-    (rand(50..60))/100.0,
-    (rand(40..50))/100.0,
-    (rand(70..90))/100.0,
-    (rand(50..80))/100.0,
-    (rand(40..60))/100.0 #/
+    (rand(20..40)) / 100.0,
+    (rand(40..50)) / 100.0,
+    (rand(70..90)) / 100.0,
+    (rand(50..80)) / 100.0,
+    (rand(15..30)) / 100.0,
+    (rand(90..100)) / 100.0,
+    (rand(50..60)) / 100.0,
+    (rand(40..80)) / 100.0
     ]
   marker_arr = [
     "ANGER",
@@ -66,14 +72,15 @@ end
     "ANNOYANCE"
     ]
   participants_arr = [
-    "Sophia", "Phillipp", "Karol", "Christian", "Mathias", "Stefanie", "Thorsten", "Leonie", "Pablo"
+    "Sophia", "Phillipp", "Karol", "Christian", "Mathias", "Stefanie", "Thorsten", "Leonie", "Pablo", "Peter", "Johannes", "Simone", "Junda", "Günther", "Hendrik", "Lars", "Astrid", "Allison"
     ]
   participants_arr = [
-    "Peter", "Johannes", "Simone", "Junda", "Günther", "Hendrik", "Lars", "Astrid", "Allison"
+    "Peter", "Johannes", "Simone", "Junda", "Günther", "Hendrik", "Lars", "Astrid", "Allison", "Sophia", "Phillipp", "Karol", "Christian", "Mathias", "Stefanie", "Thorsten", "Leonie", "Pablo"
     ]
   persona_distr = [
-    1,1,2,2,3,3,3,4,4
-    ]
+    1,1,2,2,3,3,3,4,4,1,1,2,2,3,3,3,4,4
+    ].sort
+  
 
   rdSat = RandomGaussian.new(3.5, 2)
   rdSum = RandomGaussian.new(0.5, 0.2)
@@ -81,14 +88,14 @@ end
   project = Project.create name: "Redesign E-Mail-Client-Oberfläche", customer: "SW Holding GmbH"
   
   pA = project.prototypes.create moniker: "Klassisch"
-  pB = project.prototypes.create moniker: "Gewagt" 
+  pB = project.prototypes.create moniker: "Gewagt"
     
   tasks_arr.each do |tsk|
     project.tasks.create name: tsk
   end
   
   personas_arr.each do |pers|
-    Persona.create( moniker: pers )  
+    Persona.create( moniker: pers )
   end
   
   participants_arr.each do |part|
@@ -112,12 +119,12 @@ end
           satisfaction: compl ? passSat : passSat*0.6, 
           completed: compl
         )
-      compl = difficulty*0.9 < skill ? true : false
+      compl = difficulty*0.6 < skill ? true : false
       pB.passes.create( 
           task_id: t.id,
           participant_id: p.id,
           sum: passSum,
-          tasktime: tt+rand(-20..10), 
+          tasktime: tt+rand(-60..10), 
           satisfaction: compl ? passSat : passSat*0.6, 
           completed: compl
         )

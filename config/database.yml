@@ -8,6 +8,7 @@ default: &default
   adapter: sqlite3
   pool: 5
   timeout: 5000
+  options: "PRAGMA journal_mode = OFF" # i/o error when activated
 
 development:
   <<: *default

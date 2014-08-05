@@ -33,11 +33,14 @@ function buildFetchString(fH) {
   return str;
 }
 
-Relation2.Dataset = Ember.Object.extend({
-  init: function() {
-    this.did = _super.did + 1;
-  },
+Relation2.DataController = Ember.ObjectController.extend({
   dset: null,
   dscale: null,
   did: 0
+});
+
+Relation2.DataRoute = Ember.Route.extend({
+  setupController: function(controller, data) {
+    controller.set('model', data);
+  }
 });

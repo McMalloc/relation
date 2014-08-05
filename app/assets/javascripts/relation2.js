@@ -14,14 +14,14 @@ var width = 1200;
 var height = 900;
 var startX = 0;
 var startY = 0;
-var gridSize = 96;
+var gridSize = 48;
 var gridX = 0;
 var gridY = 0;
-var tilePadding = 3;
+var tilePadding = 1;
 var categories = 9;
 var permanent_json;
 var jsons_and_scales = d3.map();
-var sets = [];
+var cachedSets = [];
 var nSets = 0;
 
 function buildDiffMap(set1, set2, parameter) {
@@ -159,8 +159,8 @@ function renderHeatmap(set, scale, vert, hor, parameter) {
       //collapseRect(this);
     }); // TODO: shows not all details, only data values
   
-  console.dir(set);
-  console.log(vert, hor);
+  //console.dir(set);
+  //console.log(vert, hor);
   
   labels = svgcanvas.selectAll("text").data(set).enter().append("text")
     .attr("width", gridSize)
