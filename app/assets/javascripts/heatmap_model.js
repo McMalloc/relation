@@ -1,5 +1,5 @@
-Relation2.HeatmapController = Ember.ObjectController.extend({
-  init: function() {
+Relation2.Heatmap = Backbone.Model.extend({
+  initialize: function() {
     fetchAndRender(buildFetchString(this.fetchHashes.template))
   },
   
@@ -32,15 +32,3 @@ function buildFetchString(fH) {
   console.log("Request JSON: " + str);
   return str;
 }
-
-Relation2.DataController = Ember.ObjectController.extend({
-  dset: null,
-  dscale: null,
-  did: 0
-});
-
-Relation2.DataRoute = Ember.Route.extend({
-  setupController: function(controller, data) {
-    controller.set('model', data);
-  }
-});

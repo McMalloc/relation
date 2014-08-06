@@ -12,25 +12,22 @@
 //
 //= require jquery
 //= require jquery_ujs
-//= require jquery
 //= require d3
-//= require handlebars
-//= require ember
-//= require ember-data
 //= require colorbrewer
 //= require_self
-//= require ./relation2
+//= require underscore
+//= require backbone
+//= require_tree . 
+//= require relation2
 
-// for more details see: http://emberjs.com/guides/application/
-Relation2 = Ember.Application.create({
-  rootElement: '#app-container',
-  LOG_TRANSITIONS: true
-});
+window.Relation2 = {
+  Models: {},
+  Collections: {},
+  Views: {},
+  Routers: {},
+  initialize: function() { console.log("Backbone initialized!") }
+};
 
-//= require_tree .
-
-Relation2.Dataset = Ember.Object.extend({
-  json: {},
-  scale: {},
-  properties: {}
+$(document).ready(function() {
+  Relation2.initialize()
 });

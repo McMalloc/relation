@@ -13,7 +13,7 @@ class PassController < ApplicationController
     
     @passes_by_query = Pass.where(@project_q).where(@prototype_q).where(@task_q).where(@participant_q)
     render json: @passes_by_query
-    # find JASON definition in the serializer
+    # find JSON definition in the serializer
   end
   
   def index

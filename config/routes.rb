@@ -6,5 +6,4 @@ Rails.application.routes.draw do
   # http://{root}/vis/fetch/pass?project_id=all&prototype_id=1&task_id=all&participant_id=all
   get 'vis/:action/:controller/' 
   get 'passes/index' => 'pass#index'
-
 end
