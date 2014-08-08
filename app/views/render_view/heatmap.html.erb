@@ -4,20 +4,21 @@
     <h1>Heatmap</h1>
   </div>
 </div>
+<p></p>
 <div class="row">  
   <div id="app-container" class="col-md-10 col-md-offset-1">
-    <div id="buttonbar">
-      <div class="btn-group">
-        <button type="radio" class="btn btn-default" checked {{ action 'switch' "tasktime" }}>task time</button>
-        <button type="radio" class="btn btn-default" {{ action 'switch' "markercount" }}>marker count</button>
-        <button type="radio" class="btn btn-default" {{ action 'switch' "satisfaction" }}>satisfaction</button>
-        <button type="radio" class="btn btn-default" {{ action 'switch' "completed" }}>was completed</button>
+      <div id="buttonbar">
+        <div class="btn-group">
+          <button type="radio" data-action="tasktime" class="btn btn-default switch">task time</button>
+          <button type="radio" data-action="markercount" class="btn btn-default switch">marker count</button>
+          <button type="radio" data-action="satisfaction" class="btn btn-default switch">satisfaction</button>
+          <button type="radio" data-action="completed" class="btn btn-default switch">was completed</button>
+        </div>
+        <div class="btn-group">
+          <button type="radio" class="btn btn-default" checked>Prototype A</button>
+          <button type="radio" class="btn btn-default">Prototype B</button>
+          <button type="radio" class="btn btn-default">Compare A and B</button>
+        </div>
       </div>
-      <div class="btn-group">
-        <button type="radio" class="btn btn-default" checked {{ action 'swap_set' "prototype_id" 1 }}>Prototype A</button>
-        <button type="radio" class="btn btn-default" {{ action 'swap_set' "prototype_id" 2 }}>Prototype B</button>
-        <button type="radio" class="btn btn-default" {{ action 'render_diff' }}>Compare A and B</button>
-      </div>
-    </div>
   </div>
 </div>

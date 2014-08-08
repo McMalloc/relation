@@ -1,5 +1,3 @@
-var app = new Relation2.Heatmap();
-
 var width = 1200;
 var height = 900;
 var startX = 0;
@@ -13,6 +11,12 @@ var permanent_json;
 var jsons_and_scales = d3.map();
 var cachedSets = [];
 var nSets = 0;
+
+function buildFetchString(fH) {
+  var str = 'fetch/pass?project_id='+ fH.project_id +'&prototype_id='+ fH.prototype_id + '&task_id='+ fH.task_id +'&participant_id='+ fH.participant_id;
+  console.log("Request JSON: " + str);
+  return str;
+}
 
 function buildDiffMap(set1, set2, parameter) {
   var diffSet = set1.slice(0);
@@ -149,9 +153,6 @@ function renderHeatmap(set, scale, vert, hor, parameter) {
       //collapseRect(this);
     }); // TODO: shows not all details, only data values
   
-  //console.dir(set);
-  //console.log(vert, hor);
-  
   labels = svgcanvas.selectAll("text").data(set).enter().append("text")
     .attr("width", gridSize)
     .attr("height", gridSize)
@@ -162,26 +163,6 @@ function renderHeatmap(set, scale, vert, hor, parameter) {
       return startY + (gridSize * (d[vert] - 1)) + tilePadding;
     })
     .text();
-/*
-  labels = svgcanvas.selectAll("text").data(set).enter().append("text")
-    .attr("x", function (d) {
-      return startX + 4 + (gridSize * d[hor]) + tilePadding;
-    })
-    .attr("y", function (d) {
-      return startY - 4 + gridSize + (gridSize * d[vert]) + tilePadding;
-    })
-    .attr("class", "tile-label");
-  labels.append("tspan")
-    .attr("dy", "-1.4em")
-    .text(function (d, i) {
-      return (d[hor]) + ", " + (d[vert]) + ": ";
-    }) // TODO: make flexible 
-  .attr("class", "tile-label small");
-  labels.append("tspan") // inherit from <text> element
-  .attr("dy", "0.8em")
-    .text(function (d, i) {
-      return d[parameter];
-    }); // TODO: label is not exact anymore, .data will suffice			
-    */
+//  labels.append("tspan") // inherit from <text> element
+
 };
-//

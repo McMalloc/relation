@@ -17,17 +17,6 @@
 //= require_self
 //= require underscore
 //= require backbone
-//= require_tree . 
-//= require relation2
-
-window.Relation2 = {
-  Models: {},
-  Collections: {},
-  Views: {},
-  Routers: {},
-  initialize: function() { console.log("Backbone initialized!") }
-};
-
-$(document).ready(function() {
-  Relation2.initialize()
-});
+//= require app
+//= require rendering
+//= require init
