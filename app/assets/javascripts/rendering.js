@@ -1,3 +1,5 @@
+var app = app || {};
+
 var width = 1200;
 var height = 900;
 var startX = 0;
@@ -7,10 +9,32 @@ var gridX = 0;
 var gridY = 0;
 var tilePadding = 1;
 var categories = 9;
-var permanent_json;
-var jsons_and_scales = d3.map();
-var cachedSets = [];
-var nSets = 0;
+var colors = "YlGnBu";
+app.svgcanvas = null;
+app.heatmap = null;
+app.renderScale = null;
+
+function initCanvas(width, height, container) {
+  app.svgcanvas = d3.select(container) //"#app-container"
+    .append("svg")
+    .attr("width", width)
+    .attr("height", height);
+}
+
+function fetchIntoModel(fetchURL) {
+  d3.json(fetchURL, function (error, json) {
+    if (error) {
+      console.error(error);
+      return false;
+    };
+    
+    var set = new app.DatasetModel();
+    set.set("dataset", json);
+    set.set("fetchWith", fetchURL);
+    
+    app.datasets.add(set);
+  });
+}
 
 function buildFetchString(fH) {
   var str = 'fetch/pass?project_id='+ fH.project_id +'&prototype_id='+ fH.prototype_id + '&task_id='+ fH.task_id +'&participant_id='+ fH.participant_id;
@@ -26,59 +50,30 @@ function buildDiffMap(set1, set2, parameter) {
   });
 }
 
-function swapSet(getRequest) {
-  d3.json(getRequest, function (error, json) {
-    permanent_json = json.pass;
-    jsons_and_scales.set(nSets, {
-      set: json.pass,
-      scl: scale
-    });
-    nSets++;
-    heatmap.data(json.pass)
-      .transition()
-      .style("fill", function (d) {
-        return d3.rgb(scale(d["tasktime"]));
-      });
-  });
-}
-
 function changeParameter(parameter) {
-  var scale = buildQuantitiveScale(permanent_json, parameter)
-  heatmap.transition().style("fill", function (d) {
-    return d3.rgb(scale(d[parameter])); //d.data*255, d.data*255, d.data*255); 
+  buildQuantitiveScale(app.datasets.last, parameter);
+  app.heatmap.transition().style("fill", function (d) {
+    console.log("Input: " + d + "   Output: " + d3.rgb(scale(d[parameter])));
+    return d3.rgb(app.renderScale(d[parameter]));
   })
 }
 
-function fetchAndRender(getRequest) {
-  d3.json(getRequest, function (error, json) {
-    permanent_json = json.pass;
-    scale = buildQuantitiveScale(json.pass, "tasktime");
-    jsons_and_scales.set(nSets, {
-      set: json.pass,
-      scl: scale
-    });
-    nSets++;
-    svgcanvas = d3.select("#app-container")
-      .append("svg")
-      .attr("width", width)
-      .attr("height", height);
-    renderHeatmap(json.pass, scale, "task_id", "participant_id", "tasktime");
-  });
-}
-
-function buildQuantitiveScale(array, parameter) {
+function buildQuantitiveScale(model, parameter) {
+  var array = model.get("dataset");
   var mapper = d3.scale.quantize()
     .domain([Math.max.apply(Math, array.map(function (pass) {
       return pass[parameter];
     })), Math.min.apply(Math, array.map(function (pass) {
       return pass[parameter];
-    }))]) // Min and Max of objects' sum attribute in the array. TODO: not safe against non quantitive data
+    }))]) // Min and Max of objects sum attribute in the array. TODO: make it readable by humans, goddammit
     .range(d3.range(0, categories - 1)); // seven color categories
+  
   var scl = function (domainValue) {
-    var palette = colorbrewer.YlGnBu[categories]; // TODO: make flexible
+    var palette = colorbrewer[colors][categories]; // TODO: make flexible
     return palette[mapper(domainValue)]; // closure TODO: really needed?
   };
-  return scl;
+  app.renderScale = scl;
+  model.set("scale", scl);
 }
 
 function showDetail(idx, visible) {
@@ -88,7 +83,6 @@ function showDetail(idx, visible) {
     labels[0][idx].style.visibility = "hidden";
   };
 };
-
 function expandRect(rect) {
   var factor = 5;
   var offset = factor + parseInt(tilePadding/2);
@@ -107,7 +101,6 @@ function expandRect(rect) {
     });
 
 }
-
 function collapseRect(rect) {
   var factor = 10;
   var offset = factor + parseInt(tilePadding/2);
@@ -125,9 +118,10 @@ function collapseRect(rect) {
   
 }
 
-function renderHeatmap(set, scale, vert, hor, parameter) {
-
-  heatmap = svgcanvas.selectAll("rect").data(set).enter().append("rect")
+function renderHeatmap(model, vert, hor, parameter) {
+  var set = model.get("dataset");
+  
+  app.heatmap = app.svgcanvas.selectAll("rect").data(set).enter().append("rect")
     .attr("width", gridSize - tilePadding)
     .attr("height", gridSize - tilePadding)
     .attr("rx", 3)
@@ -139,7 +133,7 @@ function renderHeatmap(set, scale, vert, hor, parameter) {
       return startY + (gridSize * (d[vert] - 1)) + tilePadding;
     })
     .style("fill", function (d) {
-      return d3.rgb(scale(d[parameter])); //d.data*255, d.data*255, d.data*255); 
+      return d3.rgb(app.renderScale(d[parameter])); //d.data*255, d.data*255, d.data*255); 
     })
     .attr("title", function (d, i) {
       return d[parameter];
@@ -153,16 +147,6 @@ function renderHeatmap(set, scale, vert, hor, parameter) {
       //collapseRect(this);
     }); // TODO: shows not all details, only data values
   
-  labels = svgcanvas.selectAll("text").data(set).enter().append("text")
-    .attr("width", gridSize)
-    .attr("height", gridSize)
-    .attr("x", function (d) {
-      return startX + (gridSize * (d[hor] - 1)) + tilePadding;
-    })
-    .attr("y", function (d) {
-      return startY + (gridSize * (d[vert] - 1)) + tilePadding;
-    })
-    .text();
 //  labels.append("tspan") // inherit from <text> element
 
 };

@@ -1,9 +1,11 @@
 $(document).ready( function() {
-
-  var heatmapView = new app.HeatmapView({
+  // Defining name space
+  // var app = app || {};
+  
+  heatmapView = new app.HeatmapView({
     el: $("#app-container")
   });
-  console.log("Instance created in: " + heatmapView.el);
+  console.log("Instance created in: " + heatmapView.el.nodeName +" with the name "+ heatmapView.el.id);
 });
 
 //$(function() {
