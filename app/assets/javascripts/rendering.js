@@ -11,8 +11,9 @@ var tilePadding = 1;
 var categories = 9;
 var colors = "YlGnBu";
 app.svgcanvas = null;
-app.heatmap = null;
 app.renderScale = null;
+app.renderModel = {};
+app.heatmap;
 
 function initCanvas(width, height, container) {
   app.svgcanvas = d3.select(container) //"#app-container"
@@ -21,19 +22,28 @@ function initCanvas(width, height, container) {
     .attr("height", height);
 }
 
-function fetchIntoModel(fetchURL) {
-  d3.json(fetchURL, function (error, json) {
+function fetchIntoModel(template) {
+  var fetchString = buildFetchString(template);
+  d3.json(fetchString, function (error, json) { 
     if (error) {
       console.error(error);
       return false;
     };
-    
-    var set = new app.DatasetModel();
-    set.set("dataset", json);
-    set.set("fetchWith", fetchURL);
-    
-    app.datasets.add(set);
+    var model = new app.DatasetModel();
+    model.set("dataset", json);
+    model.set("fetchWith", fetchString);
+    model.set("meta", template);
+    app.datasets.add(model);
+    console.dir(app.datasets.get(0));
+    console.dir(app.datasets.get(1));
   });
+}
+
+function updateHeatmapData(model) {
+  app.renderModel = model;
+  var set = model.get("dataset");
+  buildQuantitativeScale(model, "tasktime");
+  app.heatmap.transition().data(set);
 }
 
 function buildFetchString(fH) {
@@ -51,15 +61,15 @@ function buildDiffMap(set1, set2, parameter) {
 }
 
 function changeParameter(parameter) {
-  buildQuantitiveScale(app.datasets.last, parameter);
+  buildQuantitiveScale(app.renderModel, parameter);
+  var scale = app.renderScale;
   app.heatmap.transition().style("fill", function (d) {
-    console.log("Input: " + d + "   Output: " + d3.rgb(scale(d[parameter])));
-    return d3.rgb(app.renderScale(d[parameter]));
-  })
+    return d3.rgb(scale(d[parameter]));
+  });
 }
 
-function buildQuantitiveScale(model, parameter) {
-  var array = model.get("dataset");
+function buildQuantitiveScale(modelIdx, parameter) {
+  var array = app.datasets.get(modelIdx).get("dataset");
   var mapper = d3.scale.quantize()
     .domain([Math.max.apply(Math, array.map(function (pass) {
       return pass[parameter];
@@ -73,7 +83,6 @@ function buildQuantitiveScale(model, parameter) {
     return palette[mapper(domainValue)]; // closure TODO: really needed?
   };
   app.renderScale = scl;
-  model.set("scale", scl);
 }
 
 function showDetail(idx, visible) {
@@ -118,8 +127,9 @@ function collapseRect(rect) {
   
 }
 
-function renderHeatmap(model, vert, hor, parameter) {
-  var set = model.get("dataset");
+function renderHeatmap(modelIdx, vert, hor, parameter) {
+  var set = app.datasets.get(modelIdx).get("dataset");
+  var scale = app.renderScale;
   
   app.heatmap = app.svgcanvas.selectAll("rect").data(set).enter().append("rect")
     .attr("width", gridSize - tilePadding)
@@ -133,7 +143,7 @@ function renderHeatmap(model, vert, hor, parameter) {
       return startY + (gridSize * (d[vert] - 1)) + tilePadding;
     })
     .style("fill", function (d) {
-      return d3.rgb(app.renderScale(d[parameter])); //d.data*255, d.data*255, d.data*255); 
+      return d3.rgb(scale(d[parameter])); //d.data*255, d.data*255, d.data*255); 
     })
     .attr("title", function (d, i) {
       return d[parameter];
