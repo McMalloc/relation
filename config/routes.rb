@@ -4,6 +4,6 @@ Rails.application.routes.draw do
   
   # fetch route. pass the controller and its attributes as query string parameters to get a json response
   # http://{root}/vis/fetch/pass?project_id=all&prototype_id=1&task_id=all&participant_id=all
-  get 'vis/:action/:controller/' 
+  get 'vis/:action/:controller/'
   get 'passes/index' => 'pass#index'
 end

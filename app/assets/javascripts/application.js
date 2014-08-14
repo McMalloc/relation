@@ -17,6 +17,7 @@
 //= require_self
 //= require underscore
 //= require backbone
+//= require bootstrap
 //= require app
 //= require rendering
 //= require init

@@ -1,5 +1,59 @@
 @import "bootstrap";
+@import url(http://fonts.googleapis.com/css?family=Raleway:300);
+@import url(http://fonts.googleapis.com/css?family=Tinos);
+$primary: rgb(102, 194, 165);
 
 #buttonbar {
   margin-bottom: 48px;
+}
+
+#loading-bar {
+  width: 0%;
+  background-color: $primary;
+  height: 3px;
+  transition: width 0.2s ease-out;
+}
+
+.btn {
+  border-radius: 2px;
+  border-color: white;
+  background-color: #222;
+  color: white;
+  font-size: 14pt;
+  padding: 3px 6px;
+  font-family: 'Tinos', serif;
+  
+  &:hover {
+    background-color: $primary;
+    color: white;
+    border-color: $primary;
+    border-width: 1px;
+  }
+}
+
+.ajax-loader {
+  position: absolute;
+  left: 45%;
+  top: 45%;
+  visibility: hidden;
+}
+
+h1 {
+  font-family: 'Raleway', sans-serif;
+  font-weight: 300;
+  font-size: 36pt;
+  color: #222;
+}
+
+.app-heading {
+    box-shadow: 0px 1px 0px rgba(102, 194, 165, 0.69);
+    padding-bottom: 6px;
+    margin-bottom: 0px;
+}
+
+h2 {
+  font-family: 'Raleway', sans-serif;
+  font-weight: 300;
+  font-size: 24pt;
+  color: $primary;
 }
