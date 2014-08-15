@@ -1,6 +1,6 @@
 @import "bootstrap";
 @import url(http://fonts.googleapis.com/css?family=Raleway:300);
-@import url(http://fonts.googleapis.com/css?family=Tinos);
+@import url(http://fonts.googleapis.com/css?family=Bitter);
 $primary: rgb(102, 194, 165);
 
 #buttonbar {
@@ -19,9 +19,9 @@ $primary: rgb(102, 194, 165);
   border-color: white;
   background-color: #222;
   color: white;
-  font-size: 14pt;
+  font-size: 12pt;
   padding: 3px 6px;
-  font-family: 'Tinos', serif;
+  font-family: 'Bitter', serif;
   
   &:hover {
     background-color: $primary;

@@ -1,7 +1,5 @@
 var app = app || {};
 
-var width = 1200;
-var height = 900;
 var startX = 0;
 var startY = 0;
 var gridSize = 48;
@@ -10,6 +8,7 @@ var gridY = 0;
 var tilePadding = 1;
 var categories = 9;
 var colors = "YlGnBu";
+var divergingColors = "PiYG";
 app.svgcanvas = null;
 app.renderScale = null;
 app.renderModel = {};
@@ -36,6 +35,7 @@ function replaceSet(modelIdx, vert, hor, parameter) {
     .attr("y", function (d) {
       return startY + (gridSize * (d[vert] - 1)) + tilePadding;
     })
+    .transition()
     .style("fill", function (d) {
       return d3.rgb(scale(d[parameter])); //d.data*255, d.data*255, d.data*255); 
     })
@@ -50,12 +50,28 @@ function buildFetchString(fH) {
   return str;
 }
 
-function buildDiffMap(set1, set2, parameter) {
-  var diffSet = set1.slice(0);
-  $.each(diffSet, function (index, record) {
-    console.log(diffSet[index][parameter] + " = " + set1[index][parameter] + " - " + set2[index][parameter]);
-    diffSet[index][parameter] = set1[index][parameter] - set2[index][parameter];
-  });
+function buildDiffMap(model1Idx, model2Idx) {
+  var set1 = app.prototypes.get(model1Idx).get("passes");
+  var set2 = app.prototypes.get(model2Idx).get("passes");
+  var diffset = [];
+  
+  if (set1.length == set2.length) {
+    _.map(set1, function(e, i) {
+      diffset[i] = {};
+      diffset[i]["tasktime"] = set1[i]["tasktime"] - set2[i]["tasktime"];
+      diffset[i]["satisfaction"] = set1[i]["satisfaction"] - set2[i]["satisfaction"];
+      diffset[i]["completed"] = set1[i]["completed"] - set2[i]["completed"];
+      diffset[i]["markercount"] = set1[i]["markercount"] - set2[i]["markercount"];
+      diffset[i]["task_id"] = set1[i]["task_id"];
+      diffset[i]["participant_id"] = set1[i]["participant_id"];
+      diffset[i]["id"] = set1[i]["id"];
+    });
+  } else {
+    _.map(set1, function(e, i) {
+      diffset[i][parameter] = set1[i][parameter];
+    });
+  };
+  return diffset;
 }
 
 function changeParameter(parameter) {
@@ -63,6 +79,46 @@ function changeParameter(parameter) {
   app.heatmap.transition().style("fill", function (d) {
     return d3.rgb(scale(d[parameter]));
   });
+}
+
+function renderDiffMap(set, vert, hor, parameter) { // redundant
+  var scale = buildDiffScale(set, parameter);
+  app.heatmap.data(set)
+    .attr("width", gridSize - tilePadding)
+    .attr("height", gridSize - tilePadding)
+    .attr("rx", 3)
+    .attr("ry", 3)
+    .attr("x", function (d) {
+      return startX + (gridSize * (d[hor] - 1)) + tilePadding;
+    })
+    .attr("y", function (d) {
+      return startY + (gridSize * (d[vert] - 1)) + tilePadding;
+    })
+    .transition()
+    .style("fill", function (d) {
+      return d3.rgb(scale(d[parameter]));
+    })
+    .attr("title", function (d, i) {
+      return d[parameter];
+    });
+}
+
+function buildDiffScale(set, parameter) {
+  var max = _.max(set, function(pass) {
+    return pass[parameter];
+  });
+  var min = _.min(set, function(pass) {
+    return pass[parameter];
+  });
+  var maxRange = Math.max(Math.abs(min[parameter]), Math.abs(max[parameter]));
+  var mapper = d3.scale.quantize()
+    .range(d3.range(0, categories - 1))
+    .domain([maxRange*(-1), maxRange]);
+  var scl = function (domainValue) {
+    var palette = colorbrewer[divergingColors][categories];
+    return palette[mapper(domainValue)];
+  };
+  return scl;
 }
 
 function buildQuantitiveScale(modelIdx, parameter) {
@@ -76,7 +132,7 @@ function buildQuantitiveScale(modelIdx, parameter) {
     .range(d3.range(0, categories - 1)); // seven color categories
   
   var scl = function (domainValue) {
-    var palette = colorbrewer[colors][categories]; // TODO: make flexible
+    var palette = colorbrewer[colors][categories];
     return palette[mapper(domainValue)]; // closure TODO: really needed?
   };
   app.renderScale = scl;
@@ -129,7 +185,11 @@ function renderHeatmap(modelIdx, vert, hor, parameter) {
   app.renderModel = modelIdx;
   var set = app.prototypes.get(modelIdx).get("passes");
   var scale = buildQuantitiveScale(modelIdx, parameter);
-  //var scale = app.renderScale;
+  var nHor = _.max(set, function(pass) {
+    return pass[hor];
+  })[hor];
+  var cWidth = $("#main").width();
+  gridSize = Math.floor(cWidth/(nHor+1));
   
   app.heatmap = app.svgcanvas.selectAll("rect").data(set).enter().append("rect")
     .attr("width", gridSize - tilePadding)
@@ -137,10 +197,10 @@ function renderHeatmap(modelIdx, vert, hor, parameter) {
     .attr("rx", 3)
     .attr("ry", 3)
     .attr("x", function (d) {
-      return startX + (gridSize * (d[hor] - 1)) + tilePadding;
+      return startX + (gridSize * (d[hor] - 0)) + tilePadding;
     })
     .attr("y", function (d) {
-      return startY + (gridSize * (d[vert] - 1)) + tilePadding;
+      return startY + (gridSize * (d[vert] - 0)) + tilePadding;
     })
     .style("fill", function (d) {
       return d3.rgb(scale(d[parameter])); //d.data*255, d.data*255, d.data*255); 
@@ -155,8 +215,18 @@ function renderHeatmap(modelIdx, vert, hor, parameter) {
     .on("mouseout", function (d, i) {
       //showDetail(i, false);
       //collapseRect(this);
-    }); // TODO: shows not all details, only data values
-  
+    });
 //  labels.append("tspan") // inherit from <text> element
 
 };
+
+function buildXaxis(modelIdx, hor) {
+  var set = app.prototypes.get(modelIdx).get("passes");
+  
+  return array;
+}
+
+function buildYaxis(modelIdx, vert) {
+  var set = app.prototypes.get(modelIdx).get("passes");
+  return array;
+}

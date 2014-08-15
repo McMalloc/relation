@@ -11,7 +11,6 @@ app.HeatmapView = Backbone.View.extend({
     },
                   
     handleProgress: function(evt){
-        console.log(percentComplete);
         if (evt.lengthComputable) {  
             percentComplete = evt.loaded / evt.total;
         }
@@ -23,9 +22,16 @@ app.HeatmapView = Backbone.View.extend({
        ▲ ▲ ▲ ▲ ▲ ▲ ▲ ▲ ▲ ▲ ▲ ▲ ▲ ▲ ▲ ▲ ▲ ▲ ▲ ▲ ▲ ▲ ▲ ▲ ▲ ▲ ▲ ▲ ▲  */
     events: {
       "click .switch": "switch",
-      "click .replaceSet": "replaceSet"
+      "click .replaceSet": "replaceSet",
+      "click .diff": "diffmap"
     },
     
+    diffmap: function(event) {
+      var mapIdxs = event.target.dataset.action.split(" ");
+      var diffset = buildDiffMap(mapIdxs[0], mapIdxs[1]);
+      renderDiffMap(diffset, "task_id", "participant_id", heatmapView.currentParameter);
+    },
+  
     replaceSet: function(event) {
       replaceSet(event.target.dataset.action, "task_id", "participant_id", heatmapView.currentParameter);
     },
@@ -38,7 +44,7 @@ app.HeatmapView = Backbone.View.extend({
     // Initial render function. D3 will take it from there
     render: function(el){
       $("#loading-bar").css("width", "30%");
-      initCanvas(1200, 800, "#app-container");
+      initCanvas(1311, 800, "#app-container");
       var template = {
                       project_id: "",
                       prototype_id: 1,
@@ -47,11 +53,13 @@ app.HeatmapView = Backbone.View.extend({
                       };
 
       var thisView = this;
+      app.tasks.fetch();
+      app.participants.fetch();
       app.prototypes.fetch({
             xhr: function() {
-                var xhr = $.ajaxSettings.xhr();
-                xhr.onprogress = thisView.handleProgress;
-                return xhr; 
+              var xhr = $.ajaxSettings.xhr();
+              xhr.onprogress = thisView.handleProgress;
+              return xhr; 
             },
             success: function() {
               renderHeatmap(1, "task_id", "participant_id", heatmapView.currentParameter);
@@ -76,4 +84,24 @@ app.Prototypes = Backbone.Collection.extend({
   }
 });
 
+app.TaskModel = Backbone.Model.extend();
+app.Tasks = Backbone.Collection.extend({
+  model: app.TaskModel,
+  url: function() {
+    // REST calls to the rails JSON API
+    return "fetch/tasks?task_id=all";
+  }
+});
+
+app.ParticipantModel = Backbone.Model.extend();
+app.Participants = Backbone.Collection.extend({
+  model: app.ParticipantModel,
+  url: function() {
+    // REST calls to the rails JSON API
+    return "fetch/participants?participant_id=all";
+  }
+});
+
 app.prototypes = new app.Prototypes;
+app.tasks = new app.Tasks;
+app.participants = new app.Participants;
