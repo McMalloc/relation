@@ -44,7 +44,7 @@ app.HeatmapView = Backbone.View.extend({
     // Initial render function. D3 will take it from there
     render: function(el){
       $("#loading-bar").css("width", "30%");
-      initCanvas(1311, 800, "#app-container");
+      initCanvas($("#app-container").width(), 1000, "#app-container");
       var template = {
                       project_id: "",
                       prototype_id: 1,
@@ -90,6 +90,10 @@ app.Tasks = Backbone.Collection.extend({
   url: function() {
     // REST calls to the rails JSON API
     return "fetch/tasks?task_id=all";
+  },
+  asStringArr: function() {
+    var pID = 1; // project ID. 1 for now TODO: make usable for other projects
+    var array = [];
   }
 });
 

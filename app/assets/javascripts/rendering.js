@@ -123,6 +123,8 @@ function buildDiffScale(set, parameter) {
 
 function buildQuantitiveScale(modelIdx, parameter) {
   var array = app.prototypes.get(modelIdx).get("passes");
+  var min = 0;
+  var max = 0;
   var mapper = d3.scale.quantize()
     .domain([Math.max.apply(Math, array.map(function (pass) {
       return pass[parameter];
@@ -130,13 +132,30 @@ function buildQuantitiveScale(modelIdx, parameter) {
       return pass[parameter];
     }))]) // Min and Max of objects sum attribute in the array. TODO: make it readable by humans, goddammit
     .range(d3.range(0, categories - 1)); // seven color categories
-  
   var scl = function (domainValue) {
-    var palette = colorbrewer[colors][categories];
-    return palette[mapper(domainValue)]; // closure TODO: really needed?
+    if (domainValue) {
+      var palette = colorbrewer[colors][categories];
+      return palette[mapper(domainValue)]; // closure TODO: really needed?
+    } else {
+      return {range: mapper.range(), domain: mapper.domain()};
+    };
   };
   app.renderScale = scl;
   return scl;
+}
+
+function renderLegend(scale, nVert, nHor) {
+  var linearScl = d3.scale.linear()
+    .domain(scale().domain)
+    .range([scale().range[0], scale().range[scale().range.length - 1]]);
+  app.legend = app.svgcanvas.selectAll("rect").data(scale().range).enter().append("rect")
+    .attr("width", function() { return app.heatmap.attr("height")/2; })
+    .attr("height", function() { return (app.heatmap.attr("height")*nHor)/_.max(scale().range); })
+    .attr("x", function() { return startX + (app.heatmap.attr("width")*nHor+45); } ) //TODO: replace magic number
+    .attr("y", function(d) {
+      return startY + 
+    } )
+  return linearScl;
 }
 
 function showDetail(idx, visible) {
@@ -188,7 +207,10 @@ function renderHeatmap(modelIdx, vert, hor, parameter) {
   var nHor = _.max(set, function(pass) {
     return pass[hor];
   })[hor];
-  var cWidth = $("#main").width();
+  var nVert = _.max(set, function(pass) {
+    return pass[vert];
+  })[vert];
+  var cWidth = $("#app-container").width();
   gridSize = Math.floor(cWidth/(nHor+1));
   
   app.heatmap = app.svgcanvas.selectAll("rect").data(set).enter().append("rect")
@@ -220,13 +242,13 @@ function renderHeatmap(modelIdx, vert, hor, parameter) {
 
 };
 
-function buildXaxis(modelIdx, hor) {
-  var set = app.prototypes.get(modelIdx).get("passes");
+function buildXaxis(hor) {
+  var participantsModels = app.participants.get(modelIdx).get("passes");
   
   return array;
 }
 
-function buildYaxis(modelIdx, vert) {
+function buildYaxis(vert) {
   var set = app.prototypes.get(modelIdx).get("passes");
   return array;
 }
