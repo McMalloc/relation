@@ -57,3 +57,12 @@ h2 {
   font-size: 24pt;
   color: $primary;
 }
+
+.heatmap-label {
+  font-size: 8pt;
+}
+
+.persona-label {
+  @extend .heatmap-label;
+  fill: #bbb;
+}

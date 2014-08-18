@@ -130,7 +130,7 @@ function buildQuantitiveScale(modelIdx, parameter) {
       return pass[parameter];
     })), Math.min.apply(Math, array.map(function (pass) {
       return pass[parameter];
-    }))]) // Min and Max of objects sum attribute in the array. TODO: make it readable by humans, goddammit
+    }))]) // Min and Max of objects sum attribute in the array. TODO: make it readable by humans
     .range(d3.range(0, categories - 1)); // seven color categories
   var scl = function (domainValue) {
     if (domainValue) {
@@ -144,18 +144,30 @@ function buildQuantitiveScale(modelIdx, parameter) {
   return scl;
 }
 
-function renderLegend(scale, nVert, nHor) {
+function renderLegend(height, scale, offset) {
+  // TODO
   var linearScl = d3.scale.linear()
     .domain(scale().domain)
     .range([scale().range[0], scale().range[scale().range.length - 1]]);
-  app.legend = app.svgcanvas.selectAll("rect").data(scale().range).enter().append("rect")
-    .attr("width", function() { return app.heatmap.attr("height")/2; })
-    .attr("height", function() { return (app.heatmap.attr("height")*nHor)/_.max(scale().range); })
-    .attr("x", function() { return startX + (app.heatmap.attr("width")*nHor+45); } ) //TODO: replace magic number
-    .attr("y", function(d) {
-      return startY + 
+  var barHeight = height/_.max(scale().range);
+  var palette = colorbrewer[colors][categories];
+  var dataset = scale().range;
+  
+  app.legend = app.svgcanvas.selectAll("rect").data(dataset).enter().append("rect")
+    .attr("width", function() { 
+      return 35; 
+    })
+    .attr("height", function() { return barHeight; })
+    .attr("x", function() { 
+      return startX + offset; 
     } )
-  return linearScl;
+    .attr("y", function(d, i) {
+      console.log(i);
+      return startY + (i*barHeight);
+    })
+    .style("fill", function (d,i) {
+      return d3.rgb(palette[d]);
+    });
 }
 
 function showDetail(idx, visible) {
@@ -210,8 +222,10 @@ function renderHeatmap(modelIdx, vert, hor, parameter) {
   var nVert = _.max(set, function(pass) {
     return pass[vert];
   })[vert];
-  var cWidth = $("#app-container").width();
+  var cWidth = $("#app-container").width() - 70;
   gridSize = Math.floor(cWidth/(nHor+1));
+
+  //renderLegend((gridSize - tilePadding)*nHor, scale, (gridSize - tilePadding)*nHor+45);
   
   app.heatmap = app.svgcanvas.selectAll("rect").data(set).enter().append("rect")
     .attr("width", gridSize - tilePadding)
@@ -222,24 +236,52 @@ function renderHeatmap(modelIdx, vert, hor, parameter) {
       return startX + (gridSize * (d[hor] - 0)) + tilePadding;
     })
     .attr("y", function (d) {
-      return startY + (gridSize * (d[vert] - 0)) + tilePadding;
+      return startY + (gridSize * (d[vert] + 1)) + tilePadding;
     })
     .style("fill", function (d) {
       return d3.rgb(scale(d[parameter])); //d.data*255, d.data*255, d.data*255); 
-    })
-    .attr("title", function (d, i) {
-      return d[parameter];
-    })
-    .on("mouseenter", function (d, i) {
-      //expandRect(this);
-      //showDetail(i, true);
-    })
-    .on("mouseout", function (d, i) {
-      //showDetail(i, false);
-      //collapseRect(this);
     });
+  
 //  labels.append("tspan") // inherit from <text> element
-
+  
+  var xArr = _.zip(app.participants.pluck("name"), app.participants.pluck("persona_desc"));
+  var yArr = app.tasks.pluck("name");
+  var textHeight = 0;
+  
+  app.horAxesA = app.svgcanvas.selectAll("text .participants").data(xArr).enter().append("text")
+    .text(function(d) { return d[0]; })
+    .style("fill", function() { // dummy function to set textheight
+      textHeight = this.getBBox().height;
+    })
+    .attr("y", function() { return (2*gridSize)-tilePadding-textHeight;})
+    .attr("x", function (d, i) {
+      return textHeight + startX + (gridSize * (i + 1)) + tilePadding;
+    })
+    .attr("transform", function (d) {
+      return "rotate(-45 "+ d3.select(this).attr("x") + " " + d3.select(this).attr("y") + ")"; 
+    })
+    .attr("class", "heatmap-label");
+  
+  app.horAxesB = app.svgcanvas.selectAll("text .personas").data(xArr).enter().append("text")
+    .attr("y", function() { return (2*gridSize)-tilePadding;})
+    .attr("x", function (d, i) {
+      return textHeight + startX + (gridSize * (i + 1)) + tilePadding;
+    })
+    .attr("transform", function (d) {
+      return "rotate(-45 "+ d3.select(this).attr("x") + " " + d3.select(this).attr("y") + ")";  
+    })
+    .text(function(d) { return d[1]; })
+    .attr("class", "heatmap-label")
+    .attr("class", "persona-label");
+  
+  app.vertAxes = app.svgcanvas.selectAll("text .tasks").data(yArr).enter().append("text")
+    .attr("y", function (d, i) {
+      return startX + gridSize + ((gridSize) * (i + 1)) + textHeight;
+    })
+    .attr("x", function() { return tilePadding;})
+    //.call(wrap, gridSize)
+    .attr("class", "heatmap-label")
+    .text(function(d) { return d; });
 };
 
 function buildXaxis(hor) {
@@ -251,4 +293,28 @@ function buildXaxis(hor) {
 function buildYaxis(vert) {
   var set = app.prototypes.get(modelIdx).get("passes");
   return array;
+}
+
+function wrap(text, width) {
+  text.each(function() {
+    var text = d3.select(this),
+        words = text.text().split(/\s+/).reverse(),
+        word,
+        line = [],
+        lineNumber = 0,
+        lineHeight = 1.1, // ems
+        y = text.attr("y"),
+        dy = parseFloat(text.attr("dy")),
+        tspan = text.text(null).append("tspan").attr("x", 0).attr("y", y).attr("dy", dy + "em");
+    while (word = words.pop()) {
+      line.push(word);
+      tspan.text(line.join(" "));
+      if (tspan.node().getComputedTextLength() > width) {
+        line.pop();
+        tspan.text(line.join(" "));
+        line = [word];
+        tspan = text.append("tspan").attr("x", 0).attr("y", y).attr("dy", ++lineNumber * lineHeight + dy + "em").text(word);
+      }
+    }
+  });
 }
