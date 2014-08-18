@@ -81,6 +81,28 @@ app.Prototypes = Backbone.Collection.extend({
     // REST calls to the rails JSON API
     //return this.id ? "fetch/prototypes?prototype_id=" + this.id : "prototypes";
     return "fetch/prototypes?prototype_id=all";
+  },
+  getMeans: function(attribute, parameter, parameter_id, meanFunction) {
+    var query = {}
+    query[parameter] = parameter_id;
+    var values = _.pluck(_.where(this.get(1).get("passes"), query), attribute);
+    console.dir(values);
+    if (meanFunction == "mean") {
+      var sum = 0;
+      for (var i = 0; i < values.length; i++)
+      {
+        sum += values[i];
+      }
+      return values.length ? sum/values.length : 0;
+    };
+    if (meanFunction == "median") {
+      values.sort(function (a,b){return a - b})
+      var mid = Math.floor(values.length / 2);
+      if ((values.length % 2) == 1)  // length is odd
+          return values[mid];
+      else 
+          return (values[mid - 1] + values[mid]) / 2;
+    };
   }
 });
 
@@ -103,7 +125,8 @@ app.Participants = Backbone.Collection.extend({
   url: function() {
     // REST calls to the rails JSON API
     return "fetch/participants?participant_id=all";
-  }
+  },
+  
 });
 
 app.prototypes = new app.Prototypes;

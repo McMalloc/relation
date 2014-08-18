@@ -246,12 +246,20 @@ function renderHeatmap(modelIdx, vert, hor, parameter) {
   
   var xArr = _.zip(app.participants.pluck("name"), app.participants.pluck("persona_desc"));
   var yArr = app.tasks.pluck("name");
-  var textHeight = 0;
+  var textHeight = null;
+  
+  app.vertAxes = app.svgcanvas.selectAll("text .tasks").data(yArr).enter().append("text")
+    .attr("y", function (d, i) {
+      return startX + gridSize + ((gridSize) * (i + 1));// + textHeight;
+    })
+    .attr("x", function() { return tilePadding;})
+    //.call(wrap, gridSize)
+    .attr("class", "heatmap-label")
+    .text(function(d) { return d; });
   
   app.horAxesA = app.svgcanvas.selectAll("text .participants").data(xArr).enter().append("text")
-    .text(function(d) { return d[0]; })
     .style("fill", function() { // dummy function to set textheight
-      textHeight = this.getBBox().height;
+      if (!textHeight) {textHeight = this.getBBox().height;};
     })
     .attr("y", function() { return (2*gridSize)-tilePadding-textHeight;})
     .attr("x", function (d, i) {
@@ -260,7 +268,8 @@ function renderHeatmap(modelIdx, vert, hor, parameter) {
     .attr("transform", function (d) {
       return "rotate(-45 "+ d3.select(this).attr("x") + " " + d3.select(this).attr("y") + ")"; 
     })
-    .attr("class", "heatmap-label");
+    .attr("class", "heatmap-label")
+    .text(function(d) { return d[0]; });
   
   app.horAxesB = app.svgcanvas.selectAll("text .personas").data(xArr).enter().append("text")
     .attr("y", function() { return (2*gridSize)-tilePadding;})
@@ -270,18 +279,9 @@ function renderHeatmap(modelIdx, vert, hor, parameter) {
     .attr("transform", function (d) {
       return "rotate(-45 "+ d3.select(this).attr("x") + " " + d3.select(this).attr("y") + ")";  
     })
-    .text(function(d) { return d[1]; })
     .attr("class", "heatmap-label")
-    .attr("class", "persona-label");
-  
-  app.vertAxes = app.svgcanvas.selectAll("text .tasks").data(yArr).enter().append("text")
-    .attr("y", function (d, i) {
-      return startX + gridSize + ((gridSize) * (i + 1)) + textHeight;
-    })
-    .attr("x", function() { return tilePadding;})
-    //.call(wrap, gridSize)
-    .attr("class", "heatmap-label")
-    .text(function(d) { return d; });
+    .attr("class", "persona-label")
+    .text(function(d) { return d[1]; });
 };
 
 function buildXaxis(hor) {
