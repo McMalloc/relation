@@ -11,17 +11,17 @@
   <div id="app-container" class="col-md-10 col-md-offset-1">
       <div id="buttonbar">
         <div class="btn-group" data-toggle="buttons">
-          <label class="btn btn-default active switch" data-action="tasktime" >
-            <input type="radio" name="parameter" checked> task time
+          <label name="tasktime" class="btn btn-default active switch" data-action="tasktime" >
+            <input type="radio" checked> task time
           </label>
           <label class="btn btn-default switch" data-action="markercount">
-            <input type="radio" name="parameter"> marker count
+            <input type="radio" name="markercount"> marker count
           </label>
           <label class="btn btn-default switch" data-action="satisfaction">
-            <input type="radio" name="parameter"> satisfaction
+            <input type="radio" name="satisfaction"> satisfaction
           </label>
           <label class="btn btn-default switch" data-action="completed">
-            <input type="radio" name="parameter"> completed
+            <input type="radio" name="completed"> completed
           </label>
         </div>
         <div class="btn-group" data-toggle="buttons">
@@ -36,18 +36,17 @@
           </label>
         </div>
         
-        
-        <!--<div class="btn-group" data-toggle="buttons">
-          <button type="radio" data-action="tasktime" class="btn btn-default active switch">task time</button>
-          <button type="radio" data-action="markercount" class="btn btn-default switch">marker count</button>
-          <button type="radio" data-action="satisfaction" class="btn btn-default switch">satisfaction</button>
-          <button type="radio" data-action="completed" class="btn btn-default switch">was completed</button>
-        </div>
-        <div class="btn-group" data-toggle="buttons">
-          <button type="radio" data-action="prototype 1" class="btn btn-default replaceSet" checked>Prototype A</button>
-          <button type="radio" data-action="prototype 2" class="btn btn-default replaceSet">Prototype B</button>
-          <button type="radio" class="btn btn-default">Compare A and B</button>
-        </div>-->
+        <script type="text/template" id="marker-button-bar-tmpl">
+          <div id="marker-button-bar" class="btn-group" data-toggle="buttons">
+            {{ _.each(codes, function(code) { }}
+            
+            <label class="btn btn-default switch" data-action="markercount {{= code }}" >
+              <input type="radio" name="{{= code }}"> {{= code }}
+            </label>
+            
+            {{ }); }}
+          </div>
+        </script>
       </div>
   </div>
 </div>

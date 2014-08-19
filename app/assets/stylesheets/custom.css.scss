@@ -1,7 +1,9 @@
 @import "bootstrap";
 @import url(http://fonts.googleapis.com/css?family=Raleway:300);
 @import url(http://fonts.googleapis.com/css?family=Bitter);
-$primary: rgb(102, 194, 165);
+$primary: rgb(102, 194, 165); //TODO pick from colorbrewer
+$secondary: rgb(37, 52, 148);
+$secondary-light: rgb(34, 94, 168);
 
 #buttonbar {
   margin-bottom: 48px;
@@ -28,6 +30,10 @@ $primary: rgb(102, 194, 165);
     color: white;
     border-color: $primary;
     border-width: 1px;
+  }
+  
+  &.active {
+    box-shadow: inset 2px 2px 0px rgba(0,0,0,.125);
   }
 }
 
@@ -59,10 +65,25 @@ h2 {
 }
 
 .heatmap-label {
-  font-size: 8pt;
+  font-size: 9pt;
 }
 
 .persona-label {
   @extend .heatmap-label;
   fill: #bbb;
+}
+
+#marker-button-bar {
+  display: block;
+  
+  .btn {
+    background-color: $primary;
+    border-radius: 2px;
+    box-shadow: 2px 2px 0px rgba(0,0,0,0.4);
+  
+    &:hover {
+    background-color: $secondary-light;
+    border-color: $primary;
+    }
+  }
 }

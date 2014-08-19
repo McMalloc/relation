@@ -7,9 +7,19 @@ app.HeatmapView = Backbone.View.extend({
     initialize: function(){
       _.bindAll(this, 'render'); // fixes loss of context for 'this' within methods with Underscore method  
       this.currentParameter = "tasktime";
+      
+      // replaces ERB-style template tags with mustache style template tags to avoid conflicts
+      _.templateSettings = {
+        interpolate : /\{\{=(.+?)\}\}/g,
+        escape : /\{\{-(.+?)\}\}/g,
+        evaluate: /\{\{(.+?)\}\}/g,
+      };
+      
       this.render(); // not all views will render themselves, but this will
     },
-                  
+    
+    templates: {},
+  
     handleProgress: function(evt){
         if (evt.lengthComputable) {  
             percentComplete = evt.loaded / evt.total;
@@ -23,9 +33,17 @@ app.HeatmapView = Backbone.View.extend({
     events: {
       "click .switch": "switch",
       "click .replaceSet": "replaceSet",
-      "click .diff": "diffmap"
+      "click .diff": "diffmap",
     },
     
+    toggleElement: function(element, visible) {
+      if (visible) {
+        $(element).css("visibility", "visible");
+      } else {
+        $(element).css("visibility", "hidden");
+      };
+    },
+  
     diffmap: function(event) {
       var mapIdxs = event.target.dataset.action.split(" ");
       var diffset = buildDiffMap(mapIdxs[0], mapIdxs[1]);
@@ -37,20 +55,22 @@ app.HeatmapView = Backbone.View.extend({
     },
   
     switch: function(event) {
-      this.currentParameter = event.target.dataset.action;
-      changeParameter(event.target.dataset.action);
+      var eventAction = event.target.dataset.action.split(" ");
+      if (eventAction[0] == "markercount") {
+        this.toggleElement("#marker-button-bar", true);
+        this.currentParameter = eventAction[1];
+        changeParameter(this.currentParameter);
+      } else {
+        this.toggleElement("#marker-button-bar", false);   
+        this.currentParameter = eventAction[0];
+        changeParameter(this.currentParameter);
+      };
     },
       
     // Initial render function. D3 will take it from there
     render: function(el){
       $("#loading-bar").css("width", "30%");
       initCanvas($("#app-container").width(), 1000, "#app-container");
-      var template = {
-                      project_id: "",
-                      prototype_id: 1,
-                      participant_id: "all",
-                      task_id: "all"
-                      };
 
       var thisView = this;
       app.tasks.fetch();
@@ -62,11 +82,18 @@ app.HeatmapView = Backbone.View.extend({
               return xhr; 
             },
             success: function() {
+              app.markers = new app.Markers(_.flatten(_.pluck(app.prototypes.get(1).get("passes"), "markers")));
               renderHeatmap(1, "task_id", "participant_id", heatmapView.currentParameter);
               $(".ajax-loader").css("visibility", "hidden");
+              
+              var codeArr = _.uniq(_.pluck(_.flatten(_.pluck(app.prototypes.get(1).get("passes"), "markers")), "code")); // nice
+              var buttonBarTemplate = _.template($('#marker-button-bar-tmpl').html(), {codes: codeArr});
+              $("#buttonbar").append(buttonBarTemplate);
+              $("#marker-button-bar").css("visibility", "hidden");
+              $("#marker-button-bar").css("margin-left", $("[name='tasktime']").css("width"));
             }
       });
-    },
+    }
 });
 
 app.PrototypeModel = Backbone.Model.extend({
@@ -87,7 +114,8 @@ app.Prototypes = Backbone.Collection.extend({
     query[parameter] = parameter_id;
     var values = _.pluck(_.where(this.get(1).get("passes"), query), attribute);
     console.dir(values);
-    if (meanFunction == "mean") {
+    
+    if (meanFunction == "arithmetic") {
       var sum = 0;
       for (var i = 0; i < values.length; i++)
       {
@@ -95,6 +123,7 @@ app.Prototypes = Backbone.Collection.extend({
       }
       return values.length ? sum/values.length : 0;
     };
+    
     if (meanFunction == "median") {
       values.sort(function (a,b){return a - b})
       var mid = Math.floor(values.length / 2);
@@ -103,7 +132,8 @@ app.Prototypes = Backbone.Collection.extend({
       else 
           return (values[mid - 1] + values[mid]) / 2;
     };
-  }
+  },
+  
 });
 
 app.TaskModel = Backbone.Model.extend();
@@ -125,8 +155,24 @@ app.Participants = Backbone.Collection.extend({
   url: function() {
     // REST calls to the rails JSON API
     return "fetch/participants?participant_id=all";
-  },
-  
+  }
+});
+
+app.PassModel = Backbone.Model.extend();
+app.Passes = Backbone.Collection.extend({
+  model: app.PassModel,
+  url: function() {
+    return "fetch/pass?project_id=1?prototype_id=1?task_id=all?participant_id=all";
+  }
+});
+
+app.MarkerModel = Backbone.Model.extend();
+app.Markers = Backbone.Collection.extend({
+  model: app.MarkerModel,
+  initialize: function (models,options) { },
+  url: function() {
+    return "fetch/markers";
+  }
 });
 
 app.prototypes = new app.Prototypes;

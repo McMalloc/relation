@@ -1,8 +1,7 @@
 class PassController < ApplicationController
   def fetch
-    
     #http://localhost:3000/vis/fetch/pass?project_id=1?prototype_id=1?task_id=all?participant_id=2
-    
+
     @project_q      = ""#"project_id = " + params[:project_id] #TODO: make selectable through JOIN with prototype relation
     @prototype_q    = params[:prototype_id]   == "all" ? "" 
                     : "prototype_id = " + params[:prototype_id]

@@ -30,10 +30,10 @@ function replaceSet(modelIdx, vert, hor, parameter) {
     .attr("rx", 3)
     .attr("ry", 3)
     .attr("x", function (d) {
-      return startX + (gridSize * (d[hor] - 1)) + tilePadding;
+      return startX + (gridSize * (d[hor] + 0)) + tilePadding;
     })
     .attr("y", function (d) {
-      return startY + (gridSize * (d[vert] - 1)) + tilePadding;
+      return startY + (gridSize * (d[vert] + 1)) + tilePadding;
     })
     .transition()
     .style("fill", function (d) {
@@ -89,10 +89,10 @@ function renderDiffMap(set, vert, hor, parameter) { // redundant
     .attr("rx", 3)
     .attr("ry", 3)
     .attr("x", function (d) {
-      return startX + (gridSize * (d[hor] - 1)) + tilePadding;
+      return startX + (gridSize * (d[hor] + 0)) + tilePadding;
     })
     .attr("y", function (d) {
-      return startY + (gridSize * (d[vert] - 1)) + tilePadding;
+      return startY + (gridSize * (d[vert] + 1)) + tilePadding;
     })
     .transition()
     .style("fill", function (d) {
@@ -233,7 +233,7 @@ function renderHeatmap(modelIdx, vert, hor, parameter) {
     .attr("rx", 3)
     .attr("ry", 3)
     .attr("x", function (d) {
-      return startX + (gridSize * (d[hor] - 0)) + tilePadding;
+      return startX + (gridSize * (d[hor] + 0)) + tilePadding*3;
     })
     .attr("y", function (d) {
       return startY + (gridSize * (d[vert] + 1)) + tilePadding;
@@ -248,54 +248,44 @@ function renderHeatmap(modelIdx, vert, hor, parameter) {
   var yArr = app.tasks.pluck("name");
   var textHeight = null;
   
-  app.vertAxes = app.svgcanvas.selectAll("text .tasks").data(yArr).enter().append("text")
-    .attr("y", function (d, i) {
-      return startX + gridSize + ((gridSize) * (i + 1));// + textHeight;
-    })
-    .attr("x", function() { return tilePadding;})
-    //.call(wrap, gridSize)
-    .attr("class", "heatmap-label")
-    .text(function(d) { return d; });
-  
   app.horAxesA = app.svgcanvas.selectAll("text .participants").data(xArr).enter().append("text")
+    .text(function(d) { return d[0]; })
+    .attr("class", "heatmap-label")
     .style("fill", function() { // dummy function to set textheight
-      if (!textHeight) {textHeight = this.getBBox().height;};
+      textHeight = this.getBBox().height;
     })
     .attr("y", function() { return (2*gridSize)-tilePadding-textHeight;})
     .attr("x", function (d, i) {
-      return textHeight + startX + (gridSize * (i + 1)) + tilePadding;
+      return textHeight + startX + (gridSize * (i + 0)) + gridSize;
     })
     .attr("transform", function (d) {
       return "rotate(-45 "+ d3.select(this).attr("x") + " " + d3.select(this).attr("y") + ")"; 
-    })
-    .attr("class", "heatmap-label")
-    .text(function(d) { return d[0]; });
+    });
   
   app.horAxesB = app.svgcanvas.selectAll("text .personas").data(xArr).enter().append("text")
     .attr("y", function() { return (2*gridSize)-tilePadding;})
     .attr("x", function (d, i) {
-      return textHeight + startX + (gridSize * (i + 1)) + tilePadding;
+      return textHeight + startX + (gridSize * (i + 0)) + gridSize;
     })
     .attr("transform", function (d) {
       return "rotate(-45 "+ d3.select(this).attr("x") + " " + d3.select(this).attr("y") + ")";  
     })
     .attr("class", "heatmap-label")
     .attr("class", "persona-label")
-    .text(function(d) { return d[1]; });
-};
+    .text(function(d) { return "  " + d[1]; });
 
-function buildXaxis(hor) {
-  var participantsModels = app.participants.get(modelIdx).get("passes");
+  app.vertAxes = app.svgcanvas.append("g").selectAll("text .tasks").data(yArr).enter().append("text")
+    .attr("y", function (d, i) {
+      return startX + ((gridSize) * (i)) - gridSize*0.5;// + textHeight;
+    })
+    .attr("x", function() { return tilePadding;})
+    .attr("class", "heatmap-label")
+    .text(function(d) { return d; })
+    .call(wrap, gridSize, textHeight);
   
-  return array;
-}
+  };
 
-function buildYaxis(vert) {
-  var set = app.prototypes.get(modelIdx).get("passes");
-  return array;
-}
-
-function wrap(text, width) {
+function wrap(text, width, height) {
   text.each(function() {
     var text = d3.select(this),
         words = text.text().split(/\s+/).reverse(),
@@ -304,7 +294,7 @@ function wrap(text, width) {
         lineNumber = 0,
         lineHeight = 1.1, // ems
         y = text.attr("y"),
-        dy = parseFloat(text.attr("dy")),
+        dy = height;
         tspan = text.text(null).append("tspan").attr("x", 0).attr("y", y).attr("dy", dy + "em");
     while (word = words.pop()) {
       line.push(word);
