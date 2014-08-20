@@ -22,25 +22,25 @@ function initCanvas(width, height, container) {
 }
 
 function replaceSet(modelIdx, vert, hor, parameter) {
-  var set = app.prototypes.get(modelIdx).get("passes");
-  var scale = buildQuantitiveScale(modelIdx, parameter);
+  var set = app.passes.where({prototype_id: parseInt(modelIdx)});
+  var scale = buildQuantitiveScale(parseInt(modelIdx), parameter);
   app.heatmap.data(set)
     .attr("width", gridSize - tilePadding)
     .attr("height", gridSize - tilePadding)
     .attr("rx", 3)
     .attr("ry", 3)
     .attr("x", function (d) {
-      return startX + (gridSize * (d[hor] + 0)) + tilePadding;
+      return startX + (gridSize * (d.get(hor) + 0)) + tilePadding;
     })
     .attr("y", function (d) {
-      return startY + (gridSize * (d[vert] + 1)) + tilePadding;
+      return startY + (gridSize * (d.get(vert) + 1)) + tilePadding;
     })
     .transition()
     .style("fill", function (d) {
-      return d3.rgb(scale(d[parameter])); //d.data*255, d.data*255, d.data*255); 
+      return d3.rgb(scale(d.get(parameter)));
     })
     .attr("title", function (d, i) {
-      return d[parameter];
+      return d.get(parameter);
     });
 }
 
@@ -51,24 +51,24 @@ function buildFetchString(fH) {
 }
 
 function buildDiffMap(model1Idx, model2Idx) {
-  var set1 = app.prototypes.get(model1Idx).get("passes");
-  var set2 = app.prototypes.get(model2Idx).get("passes");
+  var set1 = app.passes.where({prototype_id: parseInt(model1Idx)});
+  var set2 = app.passes.where({prototype_id: parseInt(model2Idx)});
   var diffset = [];
   
   if (set1.length == set2.length) {
     _.map(set1, function(e, i) {
       diffset[i] = {};
-      diffset[i]["tasktime"] = set1[i]["tasktime"] - set2[i]["tasktime"];
-      diffset[i]["satisfaction"] = set1[i]["satisfaction"] - set2[i]["satisfaction"];
-      diffset[i]["completed"] = set1[i]["completed"] - set2[i]["completed"];
-      diffset[i]["markercount"] = set1[i]["markercount"] - set2[i]["markercount"];
-      diffset[i]["task_id"] = set1[i]["task_id"];
-      diffset[i]["participant_id"] = set1[i]["participant_id"];
-      diffset[i]["id"] = set1[i]["id"];
+      diffset[i]["tasktime"] = set1[i].get("tasktime") - set2[i].get("tasktime");
+      diffset[i]["satisfaction"] = set1[i].get("satisfaction") - set2[i].get("satisfaction");
+      diffset[i]["completed"] = set1[i].get("completed") - set2[i].get("completed");
+      diffset[i]["markercount"] = set1[i].get("markercount") - set2[i].get("markercount");
+      diffset[i]["task_id"] = set1[i].get("task_id");
+      diffset[i]["participant_id"] = set1[i].get("participant_id");
+      diffset[i]["id"] = set1[i].get("id");
     });
   } else {
     _.map(set1, function(e, i) {
-      diffset[i][parameter] = set1[i][parameter];
+      //diffset[i][parameter] = set1[i][parameter];
     });
   };
   return diffset;
@@ -77,7 +77,7 @@ function buildDiffMap(model1Idx, model2Idx) {
 function changeParameter(parameter) {
   var scale = buildQuantitiveScale(app.renderModel, parameter);
   app.heatmap.transition().style("fill", function (d) {
-    return d3.rgb(scale(d[parameter]));
+    return d3.rgb(scale(d.get(parameter)));
   });
 }
 
@@ -122,14 +122,14 @@ function buildDiffScale(set, parameter) {
 }
 
 function buildQuantitiveScale(modelIdx, parameter) {
-  var array = app.prototypes.get(modelIdx).get("passes");
+  var array = app.passes.where({prototype_id: modelIdx});
   var min = 0;
   var max = 0;
   var mapper = d3.scale.quantize()
     .domain([Math.max.apply(Math, array.map(function (pass) {
-      return pass[parameter];
+      return pass.get(parameter);
     })), Math.min.apply(Math, array.map(function (pass) {
-      return pass[parameter];
+      return pass.get(parameter);
     }))]) // Min and Max of objects sum attribute in the array. TODO: make it readable by humans
     .range(d3.range(0, categories - 1)); // seven color categories
   var scl = function (domainValue) {
@@ -214,14 +214,14 @@ function collapseRect(rect) {
 
 function renderHeatmap(modelIdx, vert, hor, parameter) {
   app.renderModel = modelIdx;
-  var set = app.prototypes.get(modelIdx).get("passes");
+  var set = app.passes.where({prototype_id: modelIdx});
   var scale = buildQuantitiveScale(modelIdx, parameter);
   var nHor = _.max(set, function(pass) {
-    return pass[hor];
-  })[hor];
+    return pass.get(hor);
+  }).get(hor);
   var nVert = _.max(set, function(pass) {
-    return pass[vert];
-  })[vert];
+    return pass.get(vert);
+  }).get(vert);
   var cWidth = $("#app-container").width() - 70;
   gridSize = Math.floor(cWidth/(nHor+1));
 
@@ -233,13 +233,13 @@ function renderHeatmap(modelIdx, vert, hor, parameter) {
     .attr("rx", 3)
     .attr("ry", 3)
     .attr("x", function (d) {
-      return startX + (gridSize * (d[hor] + 0)) + tilePadding*3;
+      return startX + (gridSize * (d.get(hor) + 0)) + tilePadding*3;
     })
     .attr("y", function (d) {
-      return startY + (gridSize * (d[vert] + 1)) + tilePadding;
+      return startY + (gridSize * (d.get(vert) + 1)) + tilePadding;
     })
     .style("fill", function (d) {
-      return d3.rgb(scale(d[parameter])); //d.data*255, d.data*255, d.data*255); 
+      return d3.rgb(scale(d.get(parameter))); //d.data*255, d.data*255, d.data*255); 
     });
   
 //  labels.append("tspan") // inherit from <text> element

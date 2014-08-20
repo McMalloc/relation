@@ -1,5 +1,5 @@
 class PassSerializer < ActiveModel::Serializer
-  attributes :id, :participant_id, :task_id, :satisfaction, :completed, :tasktime, :markercount
+  attributes :id, :participant_id, :task_id, :prototype_id, :satisfaction, :completed, :tasktime, :markercount
   has_many :markers
   
   def markercount

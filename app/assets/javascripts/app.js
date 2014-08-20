@@ -75,18 +75,17 @@ app.HeatmapView = Backbone.View.extend({
       var thisView = this;
       app.tasks.fetch();
       app.participants.fetch();
-      app.prototypes.fetch({
+      app.passes.fetch({
             xhr: function() {
               var xhr = $.ajaxSettings.xhr();
               xhr.onprogress = thisView.handleProgress;
               return xhr; 
             },
             success: function() {
-              app.markers = new app.Markers(_.flatten(_.pluck(app.prototypes.get(1).get("passes"), "markers")));
+              app.markers = new app.Markers(_.flatten(app.passes.pluck("markers")));
               renderHeatmap(1, "task_id", "participant_id", heatmapView.currentParameter);
               $(".ajax-loader").css("visibility", "hidden");
-              
-              var codeArr = _.uniq(_.pluck(_.flatten(_.pluck(app.prototypes.get(1).get("passes"), "markers")), "code")); // nice
+              var codeArr = _.uniq(app.markers.pluck("code")); 
               var buttonBarTemplate = _.template($('#marker-button-bar-tmpl').html(), {codes: codeArr});
               $("#buttonbar").append(buttonBarTemplate);
               $("#marker-button-bar").css("visibility", "hidden");
@@ -162,7 +161,7 @@ app.PassModel = Backbone.Model.extend();
 app.Passes = Backbone.Collection.extend({
   model: app.PassModel,
   url: function() {
-    return "fetch/pass?project_id=1?prototype_id=1?task_id=all?participant_id=all";
+    return "fetch/pass?project_id=1&prototype_id=all&task_id=all&participant_id=all";
   }
 });
 
@@ -176,5 +175,6 @@ app.Markers = Backbone.Collection.extend({
 });
 
 app.prototypes = new app.Prototypes;
+app.passes = new app.Passes
 app.tasks = new app.Tasks;
 app.participants = new app.Participants;
