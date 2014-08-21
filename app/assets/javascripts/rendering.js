@@ -11,7 +11,7 @@ var colors = "YlGnBu";
 var divergingColors = "PiYG";
 app.svgcanvas = null;
 app.renderScale = null;
-app.renderModel = {};
+app.renderSet = {};
 app.heatmap;
 
 function initCanvas(width, height, container) {
@@ -75,7 +75,7 @@ function buildDiffMap(model1Idx, model2Idx) {
 }
 
 function changeParameter(parameter) {
-  var scale = buildQuantitiveScale(app.renderModel, parameter);
+  var scale = buildQuantitiveScale(app.renderSet, parameter);
   app.heatmap.transition().style("fill", function (d) {
     return d3.rgb(scale(d.get(parameter)));
   });
@@ -121,12 +121,12 @@ function buildDiffScale(set, parameter) {
   return scl;
 }
 
-function buildQuantitiveScale(modelIdx, parameter) {
-  var array = app.passes.where({prototype_id: modelIdx});
+function buildQuantitiveScale(set, parameter) {
+  var array = set;
   var min = 0;
   var max = 0;
   var mapper = d3.scale.quantize()
-    .domain([Math.max.apply(Math, array.map(function (pass) {
+    .domain([Math.max.apply(Math, set.map(function (pass) {
       return pass.get(parameter);
     })), Math.min.apply(Math, array.map(function (pass) {
       return pass.get(parameter);
@@ -212,10 +212,9 @@ function collapseRect(rect) {
   
 }
 
-function renderHeatmap(modelIdx, vert, hor, parameter) {
-  app.renderModel = modelIdx;
-  var set = app.passes.where({prototype_id: modelIdx});
-  var scale = buildQuantitiveScale(modelIdx, parameter);
+function renderHeatmap(set, vert, hor, parameter) {
+  app.renderSet = set;
+  var scale = buildQuantitiveScale(set, parameter);
   var nHor = _.max(set, function(pass) {
     return pass.get(hor);
   }).get(hor);

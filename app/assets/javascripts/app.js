@@ -51,14 +51,17 @@ app.HeatmapView = Backbone.View.extend({
     },
   
     replaceSet: function(event) {
-      replaceSet(event.target.dataset.action, "task_id", "participant_id", heatmapView.currentParameter);
+      replaceSet(app.passes.where({prototype_id: event.target.dataset.action}), 
+                "task_id", 
+                 "participant_id", 
+                 heatmapView.currentParameter);
     },
   
     switch: function(event) {
       var eventAction = event.target.dataset.action.split(" ");
       if (eventAction[0] == "markercount") {
         this.toggleElement("#marker-button-bar", true);
-        this.currentParameter = eventAction[1];
+        this.currentParameter = eventAction[1] + "count";
         changeParameter(this.currentParameter);
       } else {
         this.toggleElement("#marker-button-bar", false);   
@@ -83,9 +86,9 @@ app.HeatmapView = Backbone.View.extend({
             },
             success: function() {
               app.markers = new app.Markers(_.flatten(app.passes.pluck("markers")));
-              renderHeatmap(1, "task_id", "participant_id", heatmapView.currentParameter);
+              renderHeatmap(app.passes.where({prototype_id: 1}), "task_id", "participant_id", heatmapView.currentParameter);
               $(".ajax-loader").css("visibility", "hidden");
-              var codeArr = _.uniq(app.markers.pluck("code")); 
+              var codeArr = app.markers.codes();
               var buttonBarTemplate = _.template($('#marker-button-bar-tmpl').html(), {codes: codeArr});
               $("#buttonbar").append(buttonBarTemplate);
               $("#marker-button-bar").css("visibility", "hidden");
@@ -157,11 +160,33 @@ app.Participants = Backbone.Collection.extend({
   }
 });
 
-app.PassModel = Backbone.Model.extend();
+app.PassModel = Backbone.Model.extend({
+ initialize: function() {
+    _.bindAll(this, "countAllMarkers");
+    //this.on("add", this.countAllMarkers);
+  },
+  countAllMarkers: function() {
+    var markerCodes = this.collection.assignedCodes;
+    var thisPass = this;
+    _.each(markerCodes, function(mrk, idx) {
+      var attribute = mrk.code + "count";
+      var value = 0;
+      var plucked = _.where(thisPass.get("markers"), {code: mrk.code});
+      if (plucked) { 
+        var value = parseInt(_.where(thisPass.get("markers"), {code: mrk.code}).length);
+      };
+      thisPass.attributes[attribute] = value;
+    });
+  },
+});
 app.Passes = Backbone.Collection.extend({
   model: app.PassModel,
   url: function() {
     return "fetch/pass?project_id=1&prototype_id=all&task_id=all&participant_id=all";
+  },
+  assignedCodes: [],
+  assignCodes: function() {
+    this.assignedCodes = _.uniq(_.flatten(this.pluck("markers")));
   }
 });
 
@@ -171,6 +196,10 @@ app.Markers = Backbone.Collection.extend({
   initialize: function (models,options) { },
   url: function() {
     return "fetch/markers";
+  },
+  codes: function() {
+    var codeArray = _.uniq(this.pluck("code")); 
+    return codeArray;
   }
 });
 
