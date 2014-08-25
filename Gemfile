@@ -19,6 +19,9 @@ gem 'd3-rails'
 gem 'spring',        group: :development
 gem 'backbone-on-rails'
 gem 'active_model_serializers'
+gem 'paperclip'
+gem 'font-awesome-rails'
+gem 'videojs_rails'
 
 # Use ActiveModel has_secure_password
 # gem 'bcrypt', '~> 3.1.7'

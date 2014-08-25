@@ -18,3 +18,5 @@
 //= require underscore
 //= require backbone
 //= require bootstrap
+//= require marking-init
+//= require marking-app

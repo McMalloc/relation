@@ -6,6 +6,25 @@
     <div id="loading-bar" ></div>
   </div>
 </div>
-<div class="row">  
-  
+<div class="row" id="app-container">
+  <div class="col-md-7 col-md-offset-1">
+    <%= video_tag "elephants-dream.webm", width:400, id: "videoframe", controls: true %>
+    <div id="playbar"></div>
+  </div>
+  <div id="marker-buttons" class="col-md-3 col-md-offset-1">
+    <script type="text/template" id="marker-button-tmpl">
+          {{ _.each(codes, function(code) { }}
+            <div class="btn-group marker-buttons">
+              <span id="{{= code }}-label" class="marker-label create-marker {{= code }}" data-action="{{= code }} x"> {{= code }} </span>
+              
+              {{ _.each(severities, function(severity) { }}
+              <button class="btn create-marker {{= code }}" data-action="{{= code }} {{= severity }}" >
+                 {{= severity }}
+              </button>
+              {{ }); }}
+              <br />
+            </div>
+          {{ }); }}
+    </script>
+  </div>
 </div>

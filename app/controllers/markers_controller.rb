@@ -5,8 +5,17 @@ class MarkersController < ApplicationController
     render json: @marker_by_id, root: false
   end
   
-  def fetchCounts
-    
+  respond_to :json
+  
+  def create
+    respond_with Marker.create(params[marker_params])
+  end
+  
+  def marker_params
+    params.require(:marker).permit(:code, :severity, :position, :pass_id)
+  end
+  
+  def fetchCounts 
   end
   # fetch Marker via Passes Marker association Pass.find(:id).marker
 end

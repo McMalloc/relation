@@ -1,4 +1,5 @@
 @import "bootstrap";
+@import "font-awesome";
 @import url(http://fonts.googleapis.com/css?family=Raleway:300);
 @import url(http://fonts.googleapis.com/css?family=Bitter);
 $primary: rgb(102, 194, 165); //TODO pick from colorbrewer
@@ -85,5 +86,30 @@ h2 {
     background-color: $secondary-light;
     border-color: $primary;
     }
+  }
+}
+
+#videoframe {
+  width: 100%;
+}
+
+.marker-buttons {
+  margin-bottom: 12px;
+  color: #222;
+  
+  .ANGER {
+    background: #e45;
+  }
+  
+  .ANNOYANCE {
+    background: #ddb658;
+  }
+  
+  .LOST {
+    background: #a558dd;
+  }
+  
+  .CONFUSED {
+    background: #40c3e2;
   }
 }
