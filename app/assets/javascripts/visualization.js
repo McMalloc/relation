@@ -18,6 +18,7 @@
 //= require underscore
 //= require backbone
 //= require bootstrap
+//= require models
 //= require heatmap-app
 //= require rendering
 //= require heatmap-init

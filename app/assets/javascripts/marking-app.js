@@ -1,7 +1,5 @@
 var app = app || {};
 
-
-
 $(document).ready(function(){
   console.log("dom ready");
 
@@ -120,30 +118,6 @@ function addMarkerTag(code, position) {
     .text(code);
     */
 }
-
-app.MarkerModel = Backbone.Model.extend({
-  url: function() {
-    return "markers/create";
-  }
-});
-
-app.Markers = Backbone.Collection.extend({
-  model: app.MarkerModel,
-  /*
-  methodToURL: {
-    'read': '/fetch/markers',
-    'create': '/markers/create',
-    'update': '/markers/update',
-    'delete': '/markers/remove'
-  },
-
-  sync: function(method, model, options) {
-    options = options || {};
-    options.url = model.methodToURL[method.toLowerCase()];
-
-    return Backbone.sync.apply(this, arguments);
-  }*/
-});
 
 function updateProgressBar() {
   var progressedWidth = playbarD3.attr("width")*(videoplayer.currentTime/videoplayer.duration)

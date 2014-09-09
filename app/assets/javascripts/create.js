@@ -19,5 +19,4 @@
 //= require backbone
 //= require bootstrap
 //= require models
-//= require marking-init
-//= require marking-app
+//= require createview

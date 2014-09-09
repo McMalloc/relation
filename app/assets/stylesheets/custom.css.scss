@@ -113,3 +113,21 @@ h2 {
     background: #40c3e2;
   }
 }
+
+#overview-table {
+  width: 100%;
+  table-layout: fixed;
+  
+  tr {
+    margin-bottom: 6px;
+  }
+}
+
+.task-cell {
+  width: 20%;
+}
+
+.pass-cell {
+  border: 2px solid white;
+  background-color: $primary;
+}

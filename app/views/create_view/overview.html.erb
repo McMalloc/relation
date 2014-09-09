@@ -1,0 +1,36 @@
+<%= javascript_include_tag 'create' %>
+
+<div class="row">
+  <div id="main" class="col-md-10 col-md-offset-1">
+
+    <h1 class="app-heading">Overview</h1>
+    <div id="loading-bar" ></div>
+    <h2>Add new tasks, participants and passes</h2>
+  </div>
+</div>
+<p></p>
+<div class="row">  
+  <div id="app-container" class="col-md-10 col-md-offset-1">
+        
+        <script type="text/template" id="table-tmpl">
+          <table id="overview-table" class="">
+            <tr>
+              <td id="table-origin"></td>
+              {{ for(var participant in participants) { }}
+              <td class="participant-cell">{{= participants[participant] }}</td>
+              {{ } }}
+            </tr>
+            
+            {{ for(var task in tasks) { }}
+              <tr> 
+                <td class="task-cell">{{= tasks[task] }}</td>
+                {{ for(var participant in participants) { }}
+                <td class="pass-cell"></td>
+                {{ } }}
+              </tr>
+            {{ } }}  
+
+          </table>
+        </script>
+  </div>
+</div>

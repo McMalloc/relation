@@ -4,6 +4,7 @@
 Rails.application.config.assets.version = '1.0'
 Rails.application.config.assets.precompile += %w( visualization.js )
 Rails.application.config.assets.precompile += %w( marking.js )
+Rails.application.config.assets.precompile += %w( create.js )
 #Rails.application.config.assets.precompile += %w( video-js.swf )
 #Rails.application.config.assets.precompile += %w( vjs.eot )
 #Rails.application.config.assets.precompile += %w( vjs.woff ) 
