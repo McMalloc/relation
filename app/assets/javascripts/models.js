@@ -51,6 +51,10 @@ app.Tasks = Backbone.Collection.extend({
   asStringArr: function() {
     var pID = 1; // project ID. 1 for now TODO: make usable for other projects
     var array = [];
+  },
+  schema: {
+    name:               'Text',
+    description:        'Text'
   }
 });
 

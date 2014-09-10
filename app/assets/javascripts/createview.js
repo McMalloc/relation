@@ -14,6 +14,12 @@ app.TableView = Backbone.View.extend({
 
     },
   
+  events: {
+    "click .new-task": "newTask",
+    "click .new-participant": "newParticipant",
+    "click .new-pass": "newPass"  
+  },
+  
   render: function(){
     console.log("rendering. Fetching now...");
     var complete = _.invoke([app.tasks, app.participants, app.passes], 'fetch');
@@ -25,6 +31,24 @@ app.TableView = Backbone.View.extend({
       var tableTemplate = _.template($('#table-tmpl').html(), {tasks: app.tasks.pluck("name"), participants: app.participants.pluck("name")});
       $("#app-container").append(tableTemplate);
     });
+  },
+  
+  newTask: function() {
+    var task = new app.TaskModel({
+      name: "Hey",
+      description: "Ho"
+    });
+    var form = new Backbone.Form({
+      model: task
+    }).render();
+  },
+  
+  newParticipant: function() {
+    alert("new participant!");
+  },
+  
+  newPass: function() {
+    alert("new pass!");
   }
 });
 
