@@ -31,47 +31,35 @@
               </tr>
             {{ } }} 
               <tr>
-              <td class="new-task add"><i class="fa fa-plus-square fa-3x"></i></td>
+              <td class="new-task add" data-toggle="modal" data-target="#create-task-modal"><i class="fa fa-plus-square fa-3x"></i></td>
               </tr>
 
           </table>
         </script>
+    
+        <div class="modal fade" id="create-task-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">
+                  <span aria-hidden="true">&times;</span>
+                  <span class="sr-only">Close</span></button>
+                <h4 class="modal-title" id="myModalLabel">Create new task</h4>
+              </div>
+              <div id="new-task-modal-body" class="modal-body">
+
+              </div>
+              <div class="modal-footer">
+              <button type="button" class="btn btn-secondary cancel-modal" data-dismiss="modal">Cancel</button>
+              <button type="button" class="btn btn-primary submit" data-dismiss="modal">Create</button>
+              </div>
+
+
+            </div>
+          </div>
+        </div>
+    
   </div>
 </div>
 
-<script id="formTemplate" type="text/html">
-    <form>
-        <h1>New User</h1>
 
-        <h2>Main Info</h2>
-        <div data-fields="title,name,birthday"></div>
-
-        <h2>Account Info</h2>
-        <h3>Email</h3>
-        <div data-fields="email"></div>
-
-        <h3>Password</h3>
-        <p>Must be at least 8 characters long</p>
-        <div data-editors="password"></div>
-    </form>
-</script>
-
-<div class="modal fade" id="create-task-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-        <h4 class="modal-title" id="myModalLabel">Create new task</h4>
-      </div>
-      <div class="modal-body">
-        
-      </div>
-      <div class="modal-footer">
-
-      <button type="button" class="btn btn-primary">Cancel</button>
-      </div>
-      
-
-    </div>
-  </div>
-</div>

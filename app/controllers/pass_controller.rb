@@ -19,5 +19,18 @@ class PassController < ApplicationController
   
   def index
     @passes = Pass.all
+    render json: @passes, root: false
+  end
+  
+  def show
+    @pass = Pass.find(params[:id])
+  end
+  
+  def create
+    Pass.create(pass_params)
+  end
+  
+  def pass_params
+    params.require(:pass).permit()
   end
 end

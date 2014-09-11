@@ -5,4 +5,22 @@ class ParticipantsController < ApplicationController
     # find JSON definition in the serializer
     # prepare for multiple projects
   end
+  
+  def index
+    @participants = Participant.all
+    render json: @participants, root: false
+  end
+  
+  def show
+    @participant = Participant.find(params[:id])
+  end
+  
+  def create
+    Participant.create(participant_params)
+  end
+  
+  def participant_params
+    params.require(:participant).permit(:name, :persona_id)
+  end
+  
 end

@@ -125,6 +125,7 @@ h2 {
 
 .task-cell {
   width: 20%;
+  height: 20%;
 }
 
 .pass-cell {
@@ -133,5 +134,9 @@ h2 {
 }
 
 .add {
-  padding: 3px;
+  padding: 5px;
+  
+  &:hover {
+    color: #bbb;
+  }
 }

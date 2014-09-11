@@ -41,29 +41,47 @@ app.Prototypes = Backbone.Collection.extend({
   
 });
 
-app.TaskModel = Backbone.Model.extend();
-app.Tasks = Backbone.Collection.extend({
-  model: app.TaskModel,
+app.TaskModel = Backbone.Model.extend({
+  schema: {
+    name:               'Text',
+    description:        'Text'
+  },
   url: function() {
     // REST calls to the rails JSON API
-    return "fetch/tasks?task_id=all";
-  },
+    return "sync/tasks";
+  }
+});
+app.Tasks = Backbone.Collection.extend({
+  model: app.TaskModel,
   asStringArr: function() {
     var pID = 1; // project ID. 1 for now TODO: make usable for other projects
     var array = [];
   },
-  schema: {
-    name:               'Text',
-    description:        'Text'
+  url: function() {
+    // REST calls to the rails JSON API
+    return "sync/tasks";
   }
 });
 
-app.ParticipantModel = Backbone.Model.extend();
+app.TaskForm = Backbone.Form.extend({
+
+});
+
+app.ParticipantModel = Backbone.Model.extend({
+  schema: {
+    name: 'Text',
+    persona: { type: 'Select', options: ['1', '2', '3'] } //TODO personas from server
+  },
+  url: function() {
+    // REST calls to the rails JSON API
+    return "sync/participants";
+  }
+});
 app.Participants = Backbone.Collection.extend({
   model: app.ParticipantModel,
   url: function() {
     // REST calls to the rails JSON API
-    return "fetch/participants?participant_id=all";
+    return "sync/participants";
   }
 });
 
@@ -71,6 +89,9 @@ app.PassModel = Backbone.Model.extend({
  initialize: function() {
     _.bindAll(this, "countAllMarkers");
     //this.on("add", this.countAllMarkers);
+  },
+  url: function() {
+    return "sync/pass";
   },
   countAllMarkers: function() {
     var markerCodes = this.collection.assignedCodes;
@@ -88,13 +109,13 @@ app.PassModel = Backbone.Model.extend({
 });
 app.Passes = Backbone.Collection.extend({
   model: app.PassModel,
-  url: function() {
-    return "fetch/pass?project_id=1&prototype_id=all&task_id=all&participant_id=all";
-  },
   assignedCodes: [],
   assignCodes: function() {
     this.assignedCodes = _.uniq(_.flatten(this.pluck("markers")));
-  }
+  },
+  url: function() {
+    return "sync/pass";
+  },
 });
 
 app.MarkerModel = Backbone.Model.extend();

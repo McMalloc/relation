@@ -1,6 +1,8 @@
 var app = app || {};
 
 app.TableView = Backbone.View.extend({
+  currentForm: {},
+  currentModel: {},
   initialize: function(){
       _.bindAll(this, 'render'); // fixes loss of context for 'this' within methods with Underscore method  
       
@@ -17,7 +19,9 @@ app.TableView = Backbone.View.extend({
   events: {
     "click .new-task": "newTask",
     "click .new-participant": "newParticipant",
-    "click .new-pass": "newPass"  
+    "click .new-pass": "newPass",
+    "click .submit": "submit",
+    "click .cancel-modal": "detach"
   },
   
   render: function(){
@@ -27,10 +31,25 @@ app.TableView = Backbone.View.extend({
     $.when.apply($, complete).done(function() {
       console.log("Fetching complete.");
       $(".ajax-loader").css("visibility", "hidden");
-      console.dir(app.tasks.pluck("name"));
       var tableTemplate = _.template($('#table-tmpl').html(), {tasks: app.tasks.pluck("name"), participants: app.participants.pluck("name")});
       $("#app-container").append(tableTemplate);
     });
+  },
+  
+  detach: function() {
+    this.currentForm.el.remove();
+  },
+  
+  submit: function() {
+    console.log("submit!");
+    this.currentForm.commit();
+    this.currentModel.save({
+      success: function() {
+        console.log("successfully saved.");
+        this.render();
+      }
+    });
+    this.currentForm.el.remove();
   },
   
   newTask: function() {
@@ -38,9 +57,13 @@ app.TableView = Backbone.View.extend({
       name: "Hey",
       description: "Ho"
     });
-    var form = new Backbone.Form({
+    var form = new app.TaskForm({
       model: task
     }).render();
+    this.currentForm = form;
+    this.currentModel = task;
+    app.Tasks.add(task);
+    $("#new-task-modal-body").append(form.el);
   },
   
   newParticipant: function() {
