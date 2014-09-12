@@ -4,65 +4,78 @@ app.TableView = Backbone.View.extend({
   currentForm: {},
   currentModel: {},
   initialize: function(){
+      var thisview = this;
+      this.table_template = $('#table-tmpl');
       _.bindAll(this, 'render'); // fixes loss of context for 'this' within methods with Underscore method  
       
-      // replaces ERB-style template tags with mustache style template tags to avoid conflicts
+      // replaces ERB-style template tags with <<-style template tags to avoid conflicts
+      // no moustaches because of visual conflicts with js brackets, e.g. {{ )}; }}
       _.templateSettings = {
-        interpolate : /\{\{=(.+?)\}\}/g,
-        escape : /\{\{-(.+?)\}\}/g,
-        evaluate: /\{\{(.+?)\}\}/g,
+        interpolate : /\<\<=(.+?)\>\>/g,
+        escape : /\<\<-(.+?)\>\>/g,
+        evaluate: /\<\<(.+?)\>\>/g
       };
-      this.render(); // not all views will render themselves, but this will
-
+      console.log("Fetching now...");
+      var complete = _.invoke([app.tasks, app.participants, app.passes], 'fetch');
+      // when all of them are complete
+      $.when.apply($, complete).done(function() {
+        console.log("Fetching complete.");
+        thisview.render(); // not all views will render themselves, but this will
+      });
     },
   
   events: {
     "click .new-task": "newTask",
     "click .new-participant": "newParticipant",
     "click .new-pass": "newPass",
-    "click .submit": "submit",
+    "click .submit-modal": "submit",
     "click .cancel-modal": "detach"
   },
   
   render: function(){
-    console.log("rendering. Fetching now...");
-    var complete = _.invoke([app.tasks, app.participants, app.passes], 'fetch');
-    // when all of them are complete
-    $.when.apply($, complete).done(function() {
-      console.log("Fetching complete.");
       $(".ajax-loader").css("visibility", "hidden");
-      var tableTemplate = _.template($('#table-tmpl').html(), {tasks: app.tasks.pluck("name"), participants: app.participants.pluck("name")});
+      var tableTemplate = _.template(this.table_template.html(), {tasks: app.tasks.pluck("name"), participants: app.participants.pluck("name")});
       $("#app-container").append(tableTemplate);
-    });
+  },
+  
+  update: function() {
+    $("#overview-table").remove();
+    this.render();
   },
   
   detach: function() {
+    this.currentModel.destroy();
     this.currentForm.el.remove();
   },
   
   submit: function() {
     console.log("submit!");
     this.currentForm.commit();
-    this.currentModel.save({
+    this.currentModel.save({}, {
       success: function() {
-        console.log("successfully saved.");
-        this.render();
+        console.log("wrote to database");
+        app.tableview.update();
       }
     });
     this.currentForm.el.remove();
   },
   
   newTask: function() {
-    var task = new app.TaskModel({
-      name: "Hey",
-      description: "Ho"
-    });
+    var task = app.tasks.create({
+      name: "",
+      description: ""
+    })
     var form = new app.TaskForm({
       model: task
     }).render();
+    /*
+      var form = new app.TaskForm({
+        model: new app.TaskModel() // empty object, will be send to database when submitting the form
+        // enables server-side validation
+      }).render();
+    */
     this.currentForm = form;
     this.currentModel = task;
-    app.Tasks.add(task);
     $("#new-task-modal-body").append(form.el);
   },
   
@@ -83,5 +96,8 @@ $(document).ready( function() {
   app.tableview = new app.TableView({
     el: $("#app-container")
   });
+  //app.tableview.listenTo(app.Participants, 'add', app.tableview.render);
+  //app.tableview.listenTo(app.Tasks, 'add', app.tableview.render);
+  //app.tableview.listenTo(app.Passes, 'add', app.tableview.render);
   console.log("Instance created in: " + app.tableview.el.nodeName +" with the name "+ app.tableview.el.id);
 });

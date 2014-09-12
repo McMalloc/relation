@@ -45,10 +45,6 @@ app.TaskModel = Backbone.Model.extend({
   schema: {
     name:               'Text',
     description:        'Text'
-  },
-  url: function() {
-    // REST calls to the rails JSON API
-    return "sync/tasks";
   }
 });
 app.Tasks = Backbone.Collection.extend({
@@ -57,10 +53,7 @@ app.Tasks = Backbone.Collection.extend({
     var pID = 1; // project ID. 1 for now TODO: make usable for other projects
     var array = [];
   },
-  url: function() {
-    // REST calls to the rails JSON API
-    return "sync/tasks";
-  }
+  url: 'sync/tasks'
 });
 
 app.TaskForm = Backbone.Form.extend({
@@ -71,27 +64,17 @@ app.ParticipantModel = Backbone.Model.extend({
   schema: {
     name: 'Text',
     persona: { type: 'Select', options: ['1', '2', '3'] } //TODO personas from server
-  },
-  url: function() {
-    // REST calls to the rails JSON API
-    return "sync/participants";
   }
 });
 app.Participants = Backbone.Collection.extend({
   model: app.ParticipantModel,
-  url: function() {
-    // REST calls to the rails JSON API
-    return "sync/participants";
-  }
+  url: 'sync/participants'
 });
 
 app.PassModel = Backbone.Model.extend({
  initialize: function() {
     _.bindAll(this, "countAllMarkers");
     //this.on("add", this.countAllMarkers);
-  },
-  url: function() {
-    return "sync/pass";
   },
   countAllMarkers: function() {
     var markerCodes = this.collection.assignedCodes;
@@ -113,9 +96,7 @@ app.Passes = Backbone.Collection.extend({
   assignCodes: function() {
     this.assignedCodes = _.uniq(_.flatten(this.pluck("markers")));
   },
-  url: function() {
-    return "sync/pass";
-  },
+  url: 'sync/pass'
 });
 
 app.MarkerModel = Backbone.Model.extend();

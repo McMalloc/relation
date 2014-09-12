@@ -13,6 +13,8 @@ Rails.application.routes.draw do
   # Backbone.sync routes
   scope '/sync' do
     resources :tasks, :participants, :pass
+    # put 'tasks' => 'tasks#update' # TODO: hack
+    # delete 'tasks' => 'tasks#delete'
   end
   
   match 'markers/create', to: 'markers#create', via: 'post'
