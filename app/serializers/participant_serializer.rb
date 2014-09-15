@@ -2,6 +2,10 @@ class ParticipantSerializer < ActiveModel::Serializer
   attributes :id, :name, :persona_desc
   
   def persona_desc
-    object.persona.moniker
+    if object.persona then
+      object.persona.moniker
+    else
+      ""
+    end
   end
 end

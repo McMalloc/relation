@@ -16,7 +16,21 @@ class ParticipantsController < ApplicationController
   end
   
   def create
-    Participant.create(participant_params)
+    @new_participant = Participant.create(participant_params)
+    render json: @new_participant, root: false
+  end
+  
+  def update
+    # @participant = Participant.find(params[:id])
+    @participant = Participant.find(params[:id])
+    @participant.update_attributes(participant_params)
+    render json: @participant, root: false, status: :ok
+  end  
+  
+  def destroy
+    @participant = Participant.find(params[:id])
+    @participant.destroy
+    head :no_content # 204 status code for deleting
   end
   
   def participant_params

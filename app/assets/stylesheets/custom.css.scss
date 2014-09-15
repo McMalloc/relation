@@ -3,6 +3,7 @@
 @import url(http://fonts.googleapis.com/css?family=Raleway:300);
 @import url(http://fonts.googleapis.com/css?family=Bitter);
 $primary: rgb(102, 194, 165); //TODO pick from colorbrewer
+$primary-light: rgb(121, 239, 209);
 $secondary: rgb(37, 52, 148);
 $secondary-light: rgb(34, 94, 168);
 
@@ -131,6 +132,12 @@ h2 {
 .pass-cell {
   border: 2px solid white;
   background-color: $primary;
+  
+  &:hover {
+    background: $primary-light;
+    border: 1px solid $primary;
+    border-radius: 2px;
+  }
 }
 
 .add {

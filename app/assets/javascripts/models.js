@@ -63,12 +63,16 @@ app.TaskForm = Backbone.Form.extend({
 app.ParticipantModel = Backbone.Model.extend({
   schema: {
     name: 'Text',
-    persona: { type: 'Select', options: ['1', '2', '3'] } //TODO personas from server
+    persona_desc: { type: 'Select', options: ['1', '2', '3', '4'] } //TODO personas from server
   }
 });
 app.Participants = Backbone.Collection.extend({
   model: app.ParticipantModel,
   url: 'sync/participants'
+});
+
+app.ParticipantForm = Backbone.Form.extend({
+
 });
 
 app.PassModel = Backbone.Model.extend({
@@ -102,10 +106,7 @@ app.Passes = Backbone.Collection.extend({
 app.MarkerModel = Backbone.Model.extend();
 app.Markers = Backbone.Collection.extend({
   model: app.MarkerModel,
-  initialize: function (models,options) { },
-  url: function() {
-    return "fetch/markers"; // return "markers/create";
-  },
+  url: 'sync/markers',
   codes: function() {
     var codeArray = _.uniq(this.pluck("code")); 
     return codeArray;
@@ -113,6 +114,7 @@ app.Markers = Backbone.Collection.extend({
 });
 
 app.prototypes = new app.Prototypes;
-app.passes = new app.Passes
+app.passes = new app.Passes;
 app.tasks = new app.Tasks;
 app.participants = new app.Participants;
+app.markers = new app.Markers;

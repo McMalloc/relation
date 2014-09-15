@@ -1,10 +1,5 @@
 var app = app || {};
 
-$(document).ready(function(){
-  console.log("dom ready");
-
-});
-
 function renderPlaybar() {
   var width = $("#playbar").width();
   
@@ -131,7 +126,6 @@ $(document).ready( function() {
   });
   console.log("Instance created in: " + markerRecorderView.el.nodeName +" with the name "+ markerRecorderView.el.id);
   //markerRecorderView.render();
-  app.markers = new app.Markers;
   videoplayer = document.getElementById("videoframe");
   videoplayer.controls = true; //false after implementing custom controls
   videoplayer.addEventListener('timeupdate', updateProgressBar, false);

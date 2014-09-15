@@ -19,14 +19,14 @@
               << for(var participant in participants) { >>
               <td class="participant-cell"><<= participants[participant] >></td>
               << } >>
-              <td class="new-participant add"><i class="fa fa-plus-square fa-3x"></i></td>
+              <td class="new-participant add" data-toggle="modal" data-target="#create-participant-modal"><i class="fa fa-plus-square fa-3x"></i></td>
             </tr>
             
             << for(var task in tasks) { >>
               <tr> 
-                <td class="task-cell"><<= tasks[task]>></td>
+                <td class="task-cell"><<= tasks[task] >></td>
                 << for(var participant in participants) { >>
-                <td class="pass-cell"></td>
+                <td data-participant-id="<<= participant_ids[participant] >>" data-task-id="<<= task_ids[task] >>" class="pass-cell"></td>
                 << } >>
               </tr>
             << } >> 
@@ -47,6 +47,28 @@
                 <h4 class="modal-title" id="myModalLabel">Create new task</h4>
               </div>
               <div id="new-task-modal-body" class="modal-body">
+
+              </div>
+              <div class="modal-footer">
+              <button type="button" class="btn btn-secondary cancel-modal" data-dismiss="modal">Cancel</button>
+              <button type="button" class="btn btn-primary submit-modal" data-dismiss="modal">Create</button>
+              </div>
+
+
+            </div>
+          </div>
+        </div>
+    
+        <div class="modal fade" id="create-participant-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">
+                  <span aria-hidden="true">&times;</span>
+                  <span class="sr-only">Close</span></button>
+                <h4 class="modal-title" id="myModalLabel">Create new participant</h4>
+              </div>
+              <div id="new-participant-modal-body" class="modal-body">
 
               </div>
               <div class="modal-footer">
