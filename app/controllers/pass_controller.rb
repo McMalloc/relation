@@ -24,6 +24,7 @@ class PassController < ApplicationController
   
   def show
     @pass = Pass.find(params[:id])
+    render json: @pass, root: false
   end
   
   def create

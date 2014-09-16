@@ -28,3 +28,7 @@
     </script>
   </div>
 </div>
+
+<%= javascript_tag do %>
+  app.currentPassId = <%= @pass.id %>;
+<% end %>

@@ -77,7 +77,7 @@ function buildDiffMap(model1Idx, model2Idx) {
 function changeParameter(parameter) {
   var scale = buildQuantitiveScale(app.renderSet, parameter);
   app.heatmap.transition().style("fill", function (d) {
-    return d3.rgb(scale(d.get(parameter)));
+    return d3.rgb(scale(d.get(parameter))); // TODO: does not work for individual markers
   });
 }
 
@@ -275,7 +275,7 @@ function renderHeatmap(set, vert, hor, parameter) {
 
   app.vertAxes = app.svgcanvas.append("g").selectAll("text .tasks").data(yArr).enter().append("text")
     .attr("y", function (d, i) {
-      return startX + ((gridSize) * (i)) - gridSize*0.5;// + textHeight;
+      return startX + ((gridSize) * (i));// + textHeight;
     })
     .attr("x", function() { return tilePadding;})
     .attr("class", "heatmap-label")

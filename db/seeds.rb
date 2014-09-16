@@ -120,7 +120,7 @@ end
           completed: compl
         )
       compl = difficulty*0.6 < skill ? true : false
-      pB.passes.create( 
+      pB.passes.create(
           task_id: t.id,
           participant_id: p.id,
           sum: passSum,
@@ -136,7 +136,7 @@ end
       pss.markers.create(
           code: marker_arr.sample,
           severity: ["S0", "S1", "S2", "S3", "S4"].sample,
-          position: [5, pss.tasktime].sample,
+          position: (5 .. pss.tasktime).to_a.sample,
         )
     end
   end

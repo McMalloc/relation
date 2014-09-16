@@ -110,7 +110,7 @@ h2 {
     background: #a558dd;
   }
   
-  .CONFUSED {
+  .CONFUSION {
     background: #40c3e2;
   }
 }
@@ -134,6 +134,11 @@ h2 {
   background-color: $primary;
   
   &:hover {
+    background: $primary-light;
+    border: 1px solid $primary;
+    border-radius: 2px;
+  }
+  &:active {
     background: $primary-light;
     border: 1px solid $primary;
     border-radius: 2px;

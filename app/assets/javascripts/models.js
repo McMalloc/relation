@@ -93,6 +93,7 @@ app.PassModel = Backbone.Model.extend({
       thisPass.attributes[attribute] = value;
     });
   },
+  urlRoot: 'sync/pass'
 });
 app.Passes = Backbone.Collection.extend({
   model: app.PassModel,

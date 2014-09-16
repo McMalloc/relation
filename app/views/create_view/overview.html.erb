@@ -26,17 +26,18 @@
               <tr> 
                 <td class="task-cell"><<= tasks[task] >></td>
                 << for(var participant in participants) { >>
-                <td data-participant-id="<<= participant_ids[participant] >>" data-task-id="<<= task_ids[task] >>" class="pass-cell"></td>
+                <td data-participantid="<<= participant_ids[participant] >>" data-taskid="<<= task_ids[task] >>" class="pass-cell"></td>
                 << } >>
               </tr>
             << } >> 
               <tr>
+
               <td class="new-task add" data-toggle="modal" data-target="#create-task-modal"><i class="fa fa-plus-square fa-3x"></i></td>
+
               </tr>
 
           </table>
         </script>
-    
         <div class="modal fade" id="create-task-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
           <div class="modal-dialog">
             <div class="modal-content">
@@ -80,6 +81,8 @@
             </div>
           </div>
         </div>
+    
+    <%= link_to "Visualize", heatmap_path %>
     
   </div>
 </div>

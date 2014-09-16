@@ -36,11 +36,12 @@ app.TableView = Backbone.View.extend({
   
   editPassView: function(event) {
     var selectedPass = app.passes.where({
-      task_id: parseInt(event.target.dataset.task-id),
-      participant_id: parseInt(event.target.dataset.participant-id),
+      task_id: parseInt(event.target.dataset.taskid),
+      participant_id: parseInt(event.target.dataset.participantid),
       prototype_id: 1
     });
-    
+    console.dir(selectedPass);
+    window.location.href = 'mark?pass_id=' + selectedPass[0].get("id");
   },
   
   render: function(){
