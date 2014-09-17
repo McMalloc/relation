@@ -53,7 +53,7 @@ app.Tasks = Backbone.Collection.extend({
     var pID = 1; // project ID. 1 for now TODO: make usable for other projects
     var array = [];
   },
-  url: 'sync/tasks'
+  url: 'tasks.json' //'sync/tasks'
 });
 
 app.TaskForm = Backbone.Form.extend({
@@ -68,7 +68,7 @@ app.ParticipantModel = Backbone.Model.extend({
 });
 app.Participants = Backbone.Collection.extend({
   model: app.ParticipantModel,
-  url: 'sync/participants'
+  url: 'participants.json' //'sync/participants'
 });
 
 app.ParticipantForm = Backbone.Form.extend({
@@ -93,7 +93,7 @@ app.PassModel = Backbone.Model.extend({
       thisPass.attributes[attribute] = value;
     });
   },
-  urlRoot: 'sync/pass'
+  urlRoot: 'passes.json' //'sync/pass'
 });
 app.Passes = Backbone.Collection.extend({
   model: app.PassModel,
@@ -101,7 +101,7 @@ app.Passes = Backbone.Collection.extend({
   assignCodes: function() {
     this.assignedCodes = _.uniq(_.flatten(this.pluck("markers")));
   },
-  url: 'sync/pass'
+  url: 'passes.json' //'sync/pass'
 });
 
 app.MarkerModel = Backbone.Model.extend();

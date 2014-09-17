@@ -12,7 +12,13 @@ var divergingColors = "PiYG";
 app.svgcanvas = null;
 app.renderScale = null;
 app.renderSet = {};
-app.heatmap;
+app.heatmap = {};
+app.lastParameter = "";
+app.mapper = {};
+
+function isReversed(parameter) {
+  return (parameter == "tasktime" || parameter == "satisfaction");
+}
 
 function initCanvas(width, height, container) {
   app.svgcanvas = d3.select(container) //"#app-container"
@@ -75,10 +81,19 @@ function buildDiffMap(model1Idx, model2Idx) {
 }
 
 function changeParameter(parameter) {
-  var scale = buildQuantitiveScale(app.renderSet, parameter);
-  app.heatmap.transition().style("fill", function (d) {
-    return d3.rgb(scale(d.get(parameter))); // TODO: does not work for individual markers
+  if (app.lastParameter != parameter) {
+    if (isReversed(parameter)) {
+      app.renderScale = buildQuantitiveScale(app.renderSet, parameter, true);
+    } else {
+      app.renderScale = buildQuantitiveScale(app.renderSet, parameter, false);
+    };
+  }
+  app.heatmaprects.transition().style("fill", function (d) {
+    return d3.rgb(app.renderScale(d.get(parameter))); // TODO: does not work for individual markers
   });
+  app.heatmaplabels.text(function(d){ 
+    return d.get(parameter); 
+  })
 }
 
 function renderDiffMap(set, vert, hor, parameter) { // redundant
@@ -121,10 +136,13 @@ function buildDiffScale(set, parameter) {
   return scl;
 }
 
-function buildQuantitiveScale(set, parameter) {
+function buildQuantitiveScale(set, parameter, inversed) {
   var array = set;
   var min = 0;
   var max = 0;
+  var palette = colorbrewer[colors][categories];
+  if (inversed) { palette.reverse() };
+  
   var mapper = d3.scale.quantize()
     .domain([Math.max.apply(Math, set.map(function (pass) {
       return pass.get(parameter);
@@ -133,88 +151,47 @@ function buildQuantitiveScale(set, parameter) {
     }))]) // Min and Max of objects sum attribute in the array. TODO: make it readable by humans
     .range(d3.range(0, categories - 1)); // seven color categories
   var scl = function (domainValue) {
-    if (domainValue) {
-      var palette = colorbrewer[colors][categories];
-      return palette[mapper(domainValue)]; // closure TODO: really needed?
-    } else {
-      return {range: mapper.range(), domain: mapper.domain()};
-    };
+    return palette[mapper(domainValue)]; // closure TODO: really needed?
   };
   app.renderScale = scl;
+  app.mapper = mapper;
+  app.lastParameter = parameter;
   return scl;
 }
 
-function renderLegend(height, scale, offset) {
-  // TODO
-  var linearScl = d3.scale.linear()
-    .domain(scale().domain)
-    .range([scale().range[0], scale().range[scale().range.length - 1]]);
-  var barHeight = height/_.max(scale().range);
+function renderLegend(nVert, nHor, offset) {
   var palette = colorbrewer[colors][categories];
-  var dataset = scale().range;
+  var barHeight = (nVert*gridSize)/palette.length;
+
+  app.legend = app.svgcanvas.append("g").selectAll("g").data(palette).enter().append("g") 
+    .attr("transform", function(d, i) {
+      return "translate("+ ((nHor*gridSize) + gridSize + 30) +","+ ((gridSize*2) + tilePadding + (i*barHeight)) +")";
+    });
   
-  app.legend = app.svgcanvas.selectAll("rect").data(dataset).enter().append("rect")
+  app.legend.append("rect")
     .attr("width", function() { 
       return 35; 
     })
     .attr("height", function() { return barHeight; })
-    .attr("x", function() { 
-      return startX + offset; 
-    } )
-    .attr("y", function(d, i) {
-      console.log(i);
-      return startY + (i*barHeight);
-    })
     .style("fill", function (d,i) {
-      return d3.rgb(palette[d]);
+      return d3.rgb(d);
     });
-}
-
-function showDetail(idx, visible) {
-  if (visible) {
-    labels[0][idx].style.visibility = "visible";
-  } else {
-    labels[0][idx].style.visibility = "hidden";
-  };
-};
-function expandRect(rect) {
-  var factor = 5;
-  var offset = factor + parseInt(tilePadding/2);
-  console.log(offset);
-  var selection = d3.select(rect).transition().duration(125);
-  
-  rect.parentNode.appendChild(rect); // move to the top!
-  selection
-    .attr("width", gridSize + (factor*2))
-    .attr("height", gridSize + (factor*2))
-    .attr("x", function() { 
-      return parseInt(d3.select(rect).attr("x")) - offset; 
-    })
-    .attr("y", function() { 
-      return parseInt(d3.select(rect).attr("y")) - offset; 
+    
+  app.legend.append("text")
+    .attr("transform", "translate(40,15)")
+    .text( function(d, i) {
+      console.log(d);
+      return parseInt(app.mapper.invertExtent(i-1)[0]);
     });
-
-}
-function collapseRect(rect) {
-  var factor = 10;
-  var offset = factor + parseInt(tilePadding/2);
-  var selection = d3.select(rect).transition().duration(125);
-  console.log(offset);
-  selection
-    .attr("width", gridSize - tilePadding)
-    .attr("height", gridSize - tilePadding)
-    .attr("x", function() { 
-      return parseInt(d3.select(rect).attr("x")) + offset; 
-    })
-    .attr("y", function() { 
-      return parseInt(d3.select(rect).attr("y")) + offset; 
-    });
-  
 }
 
 function renderHeatmap(set, vert, hor, parameter) {
   app.renderSet = set;
-  var scale = buildQuantitiveScale(set, parameter);
+  if (isReversed(parameter)) {
+    app.renderScale = buildQuantitiveScale(set, parameter, true);
+  } else {
+    app.renderScale = buildQuantitiveScale(set, parameter, false);
+  };
   var nHor = _.max(set, function(pass) {
     return pass.get(hor);
   }).get(hor);
@@ -224,24 +201,27 @@ function renderHeatmap(set, vert, hor, parameter) {
   var cWidth = $("#app-container").width() - 70;
   gridSize = Math.floor(cWidth/(nHor+1));
 
-  //renderLegend((gridSize - tilePadding)*nHor, scale, (gridSize - tilePadding)*nHor+45);
+  app.heatmap = app.svgcanvas.selectAll("g").data(set).enter().append("g")
+    .attr("transform", function(d, i) {
+      return "translate("+ (startX + (gridSize * (d.get(hor) + 0)) + tilePadding*3) +","+ (startY + (gridSize * (d.get(vert) + 1)) + tilePadding) +")"; })
+    .attr("title", function(d) { return d.get(parameter); })
+    .on("mouseenter", function(d, i) { d3.select("#Label-for-index-"+i).style("fill-opacity", "100%"); })
+    .on("mouseleave", function(d, i) { d3.select("#Label-for-index-"+i).style("fill-opacity", "0%"); });
   
-  app.heatmap = app.svgcanvas.selectAll("rect").data(set).enter().append("rect")
+  app.heatmaprects = app.heatmap.append("rect")
     .attr("width", gridSize - tilePadding)
     .attr("height", gridSize - tilePadding)
     .attr("rx", 3)
     .attr("ry", 3)
-    .attr("x", function (d) {
-      return startX + (gridSize * (d.get(hor) + 0)) + tilePadding*3;
-    })
-    .attr("y", function (d) {
-      return startY + (gridSize * (d.get(vert) + 1)) + tilePadding;
-    })
     .style("fill", function (d) {
-      return d3.rgb(scale(d.get(parameter))); //d.data*255, d.data*255, d.data*255); 
+      return d3.rgb(app.renderScale(d.get(parameter))); //d.data*255, d.data*255, d.data*255); 
     });
   
-//  labels.append("tspan") // inherit from <text> element
+  app.heatmaplabels = app.heatmap.append("text")
+    .text(function(d){ return d.get(parameter); })
+    .attr("transform", "translate(10, "+ (gridSize-10) +")")
+    .attr("class", "heatmap-label")
+    .attr("id", function(d, i) { return "Label-for-index-"+i; });
   
   var xArr = _.zip(app.participants.pluck("name"), app.participants.pluck("persona_desc"));
   var yArr = app.tasks.pluck("name");
@@ -249,7 +229,7 @@ function renderHeatmap(set, vert, hor, parameter) {
   
   app.horAxesA = app.svgcanvas.selectAll("text .participants").data(xArr).enter().append("text")
     .text(function(d) { return d[0]; })
-    .attr("class", "heatmap-label")
+    .attr("class", "axes-label")
     .style("fill", function() { // dummy function to set textheight
       textHeight = this.getBBox().height;
     })
@@ -269,7 +249,7 @@ function renderHeatmap(set, vert, hor, parameter) {
     .attr("transform", function (d) {
       return "rotate(-45 "+ d3.select(this).attr("x") + " " + d3.select(this).attr("y") + ")";  
     })
-    .attr("class", "heatmap-label")
+    .attr("class", "axes-label")
     .attr("class", "persona-label")
     .text(function(d) { return "  " + d[1]; });
 
@@ -278,9 +258,11 @@ function renderHeatmap(set, vert, hor, parameter) {
       return startX + ((gridSize) * (i));// + textHeight;
     })
     .attr("x", function() { return tilePadding;})
-    .attr("class", "heatmap-label")
+    .attr("class", "axes-label")
     .text(function(d) { return d; })
     .call(wrap, gridSize, textHeight);
+  
+  renderLegend(nVert, nHor, 30);
   
   };
 

@@ -73,7 +73,7 @@ app.HeatmapView = Backbone.View.extend({
     // Initial render function. D3 will take it from there
     render: function(el){
       $("#loading-bar").css("width", "30%");
-      initCanvas($("#app-container").width(), 1000, "#app-container");
+      initCanvas($("#app-container").width()+500, 1500, "#app-container");
 
       var thisView = this;
       // invoke the fetch method on all collections and keep their returns in the complete variable

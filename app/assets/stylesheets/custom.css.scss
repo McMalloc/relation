@@ -66,12 +66,19 @@ h2 {
   color: $primary;
 }
 
-.heatmap-label {
+.axes-label {
   font-size: 9pt;
 }
 
+.heatmap-label {
+  fill: #fff;
+  font-size: 18pt;
+  font-family: 'Raleway', sans-serif;
+  fill-opacity: 0%;
+}
+
 .persona-label {
-  @extend .heatmap-label;
+  @extend .axes-label;
   fill: #bbb;
 }
 
