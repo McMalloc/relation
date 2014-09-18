@@ -1,10 +1,6 @@
 var app = app || {};
 
-var startX = 0;
-var startY = 0;
 var gridSize = 48;
-var gridX = 0;
-var gridY = 0;
 var tilePadding = 1;
 var categories = 9;
 var colors = "YlGnBu";
@@ -16,10 +12,6 @@ app.heatmap = {};
 app.lastParameter = "";
 app.mapper = {};
 
-function isReversed(parameter) {
-  return (parameter == "tasktime" || parameter == "satisfaction");
-}
-
 function initCanvas(width, height, container) {
   app.svgcanvas = d3.select(container) //"#app-container"
     .append("svg")
@@ -27,105 +19,58 @@ function initCanvas(width, height, container) {
     .attr("height", height);
 }
 
-function replaceSet(modelIdx, vert, hor, parameter) {
-  var set = app.passes.where({prototype_id: parseInt(modelIdx)});
-  var scale = buildQuantitiveScale(parseInt(modelIdx), parameter);
-  app.heatmap.data(set)
-    .attr("width", gridSize - tilePadding)
-    .attr("height", gridSize - tilePadding)
-    .attr("rx", 3)
-    .attr("ry", 3)
-    .attr("x", function (d) {
-      return startX + (gridSize * (d.get(hor) + 0)) + tilePadding;
-    })
-    .attr("y", function (d) {
-      return startY + (gridSize * (d.get(vert) + 1)) + tilePadding;
-    })
+function replaceSet() {
+  app.renderSet = app.passes.where({prototype_id: heatmapView.setId});
+  app.heatmaprects.data(app.renderSet)
     .transition()
     .style("fill", function (d) {
-      return d3.rgb(scale(d.get(parameter)));
+      return d3.rgb(app.renderScale(d.get(heatmapView.currentParameter)));
     })
     .attr("title", function (d, i) {
-      return d.get(parameter);
+      return d.get(heatmapView.currentParameter);
     });
+  app.heatmaplabels.data(app.renderSet)
+    .text(function(d){ return d.get(heatmapView.currentParameter); });
 }
 
-function buildFetchString(fH) {
-  var str = 'fetch/pass?project_id='+ fH.project_id +'&prototype_id='+ fH.prototype_id + '&task_id='+ fH.task_id +'&participant_id='+ fH.participant_id;
-  console.log("Request JSON: " + str);
-  return str;
+function buildDiffMap(idA, idB) {
+  var setA = _.map(app.passes.where({prototype_id: parseInt(idA)}), function (m) { return m.get(heatmapView.currentParameter); });
+  var setB = _.map(app.passes.where({prototype_id: parseInt(idB)}), function (m) { return m.get(heatmapView.currentParameter); });
+  return (_.map(_.zip(setA, setB), function(a) { return a[1]-a[0] }));
 }
 
-function buildDiffMap(model1Idx, model2Idx) {
-  var set1 = app.passes.where({prototype_id: parseInt(model1Idx)});
-  var set2 = app.passes.where({prototype_id: parseInt(model2Idx)});
-  var diffset = [];
-  
-  if (set1.length == set2.length) {
-    _.map(set1, function(e, i) {
-      diffset[i] = {};
-      diffset[i]["tasktime"] = set1[i].get("tasktime") - set2[i].get("tasktime");
-      diffset[i]["satisfaction"] = set1[i].get("satisfaction") - set2[i].get("satisfaction");
-      diffset[i]["completed"] = set1[i].get("completed") - set2[i].get("completed");
-      diffset[i]["markercount"] = set1[i].get("markercount") - set2[i].get("markercount");
-      diffset[i]["task_id"] = set1[i].get("task_id");
-      diffset[i]["participant_id"] = set1[i].get("participant_id");
-      diffset[i]["id"] = set1[i].get("id");
+function renderDiffMap(set) {
+  app.renderScale = buildDiffScale(set);
+  app.heatmap.data(set);
+  app.heatmaprects.data(set)
+    .transition()
+    .style("fill", function (d) {
+      console.log(d);
+      return d3.rgb(app.renderScale(d));
+    })
+    .attr("title", function (d, i) {
+      return d;
     });
-  } else {
-    _.map(set1, function(e, i) {
-      //diffset[i][parameter] = set1[i][parameter];
-    });
-  };
-  return diffset;
+  app.heatmaplabels.data(set)
+    .text(function(d){ return d; });
+  updateLegend();
 }
 
-function changeParameter(parameter) {
-  if (app.lastParameter != parameter) {
-    if (isReversed(parameter)) {
-      app.renderScale = buildQuantitiveScale(app.renderSet, parameter, true);
-    } else {
-      app.renderScale = buildQuantitiveScale(app.renderSet, parameter, false);
-    };
-  }
+function changeParameter() {
+  buildScale();
   app.heatmaprects.transition().style("fill", function (d) {
-    return d3.rgb(app.renderScale(d.get(parameter))); // TODO: does not work for individual markers
+    return d3.rgb(app.renderScale(d.get(heatmapView.currentParameter))); // TODO: does not work for individual markers
   });
   app.heatmaplabels.text(function(d){ 
-    return d.get(parameter); 
-  })
+    return d.get(heatmapView.currentParameter); 
+  });
+  updateLegend();
 }
 
-function renderDiffMap(set, vert, hor, parameter) { // redundant
-  var scale = buildDiffScale(set, parameter);
-  app.heatmap.data(set)
-    .attr("width", gridSize - tilePadding)
-    .attr("height", gridSize - tilePadding)
-    .attr("rx", 3)
-    .attr("ry", 3)
-    .attr("x", function (d) {
-      return startX + (gridSize * (d[hor] + 0)) + tilePadding;
-    })
-    .attr("y", function (d) {
-      return startY + (gridSize * (d[vert] + 1)) + tilePadding;
-    })
-    .transition()
-    .style("fill", function (d) {
-      return d3.rgb(scale(d[parameter]));
-    })
-    .attr("title", function (d, i) {
-      return d[parameter];
-    });
-}
-
-function buildDiffScale(set, parameter) {
-  var max = _.max(set, function(pass) {
-    return pass[parameter];
-  });
-  var min = _.min(set, function(pass) {
-    return pass[parameter];
-  });
-  var maxRange = Math.max(Math.abs(min[parameter]), Math.abs(max[parameter]));
+function buildDiffScale(set) {
+  var max = _.max(set);
+  var min = _.min(set);
+  var maxRange = Math.max(Math.abs(min), Math.abs(max));
   var mapper = d3.scale.quantize()
     .range(d3.range(0, categories - 1))
     .domain([maxRange*(-1), maxRange]);
@@ -136,39 +81,46 @@ function buildDiffScale(set, parameter) {
   return scl;
 }
 
-function buildQuantitiveScale(set, parameter, inversed) {
-  var array = set;
+function buildQuantitiveScale() {
   var min = 0;
   var max = 0;
   var palette = colorbrewer[colors][categories];
-  if (inversed) { palette.reverse() };
+  var array = app.passes.pluck(heatmapView.currentParameter);
   
   var mapper = d3.scale.quantize()
-    .domain([Math.max.apply(Math, set.map(function (pass) {
-      return pass.get(parameter);
-    })), Math.min.apply(Math, array.map(function (pass) {
-      return pass.get(parameter);
-    }))]) // Min and Max of objects sum attribute in the array. TODO: make it readable by humans
+    .domain([_.min(array), _.max(array)]) // Min and Max of objects sum attribute in the array. TODO: make it readable by humans
     .range(d3.range(0, categories - 1)); // seven color categories
   var scl = function (domainValue) {
     return palette[mapper(domainValue)]; // closure TODO: really needed?
   };
   app.renderScale = scl;
   app.mapper = mapper;
-  app.lastParameter = parameter;
-  return scl;
+}
+
+function updateLegend() {
+  var palette = colorbrewer[colors][categories];
+  
+  app.legendfields.transition()
+    .style("fill", function (d,i) {
+      return d3.rgb(d);
+    });
+  
+  app.legendlabels.transition()
+    .text( function(d, i) {
+      return parseInt(app.mapper.invertExtent(i-1)[0]);
+    });
 }
 
 function renderLegend(nVert, nHor, offset) {
   var palette = colorbrewer[colors][categories];
   var barHeight = (nVert*gridSize)/palette.length;
-
+  
   app.legend = app.svgcanvas.append("g").selectAll("g").data(palette).enter().append("g") 
     .attr("transform", function(d, i) {
       return "translate("+ ((nHor*gridSize) + gridSize + 30) +","+ ((gridSize*2) + tilePadding + (i*barHeight)) +")";
     });
   
-  app.legend.append("rect")
+  app.legendfields = app.legend.append("rect")
     .attr("width", function() { 
       return 35; 
     })
@@ -177,34 +129,31 @@ function renderLegend(nVert, nHor, offset) {
       return d3.rgb(d);
     });
     
-  app.legend.append("text")
+  app.legendlabels = app.legend.append("text")
     .attr("transform", "translate(40,15)")
     .text( function(d, i) {
-      console.log(d);
       return parseInt(app.mapper.invertExtent(i-1)[0]);
     });
 }
 
-function renderHeatmap(set, vert, hor, parameter) {
-  app.renderSet = set;
-  if (isReversed(parameter)) {
-    app.renderScale = buildQuantitiveScale(set, parameter, true);
-  } else {
-    app.renderScale = buildQuantitiveScale(set, parameter, false);
-  };
-  var nHor = _.max(set, function(pass) {
+function renderHeatmap(prototypeId) {
+  var vert = "task_id";
+  var hor = "participant_id";
+  app.renderSet = app.passes.where({prototype_id: heatmapView.setId});
+  buildQuantitiveScale();
+  var nHor = _.max(app.renderSet, function(pass) {
     return pass.get(hor);
   }).get(hor);
-  var nVert = _.max(set, function(pass) {
+  var nVert = _.max(app.renderSet, function(pass) {
     return pass.get(vert);
   }).get(vert);
   var cWidth = $("#app-container").width() - 70;
   gridSize = Math.floor(cWidth/(nHor+1));
 
-  app.heatmap = app.svgcanvas.selectAll("g").data(set).enter().append("g")
+  app.heatmap = app.svgcanvas.selectAll("g").data(app.renderSet).enter().append("g")
     .attr("transform", function(d, i) {
-      return "translate("+ (startX + (gridSize * (d.get(hor) + 0)) + tilePadding*3) +","+ (startY + (gridSize * (d.get(vert) + 1)) + tilePadding) +")"; })
-    .attr("title", function(d) { return d.get(parameter); })
+      return "translate("+ ((gridSize * (d.get(hor) + 0)) + tilePadding*3) +","+ ((gridSize * (d.get(vert) + 1)) + tilePadding) +")"; })
+    .attr("title", function(d) { return d.get(heatmapView.currentParameter); })
     .on("mouseenter", function(d, i) { d3.select("#Label-for-index-"+i).style("fill-opacity", "100%"); })
     .on("mouseleave", function(d, i) { d3.select("#Label-for-index-"+i).style("fill-opacity", "0%"); });
   
@@ -214,11 +163,11 @@ function renderHeatmap(set, vert, hor, parameter) {
     .attr("rx", 3)
     .attr("ry", 3)
     .style("fill", function (d) {
-      return d3.rgb(app.renderScale(d.get(parameter))); //d.data*255, d.data*255, d.data*255); 
+      return d3.rgb(app.renderScale(d.get(heatmapView.currentParameter))); //d.data*255, d.data*255, d.data*255); 
     });
   
   app.heatmaplabels = app.heatmap.append("text")
-    .text(function(d){ return d.get(parameter); })
+    .text(function(d){ return d.get(heatmapView.currentParameter); })
     .attr("transform", "translate(10, "+ (gridSize-10) +")")
     .attr("class", "heatmap-label")
     .attr("id", function(d, i) { return "Label-for-index-"+i; });
@@ -235,7 +184,7 @@ function renderHeatmap(set, vert, hor, parameter) {
     })
     .attr("y", function() { return (2*gridSize)-tilePadding-textHeight;})
     .attr("x", function (d, i) {
-      return textHeight + startX + (gridSize * (i + 0)) + gridSize;
+      return textHeight + (gridSize * (i + 0)) + gridSize;
     })
     .attr("transform", function (d) {
       return "rotate(-45 "+ d3.select(this).attr("x") + " " + d3.select(this).attr("y") + ")"; 
@@ -244,7 +193,7 @@ function renderHeatmap(set, vert, hor, parameter) {
   app.horAxesB = app.svgcanvas.selectAll("text .personas").data(xArr).enter().append("text")
     .attr("y", function() { return (2*gridSize)-tilePadding;})
     .attr("x", function (d, i) {
-      return textHeight + startX + (gridSize * (i + 0)) + gridSize;
+      return textHeight + (gridSize * (i + 0)) + gridSize;
     })
     .attr("transform", function (d) {
       return "rotate(-45 "+ d3.select(this).attr("x") + " " + d3.select(this).attr("y") + ")";  
@@ -255,7 +204,7 @@ function renderHeatmap(set, vert, hor, parameter) {
 
   app.vertAxes = app.svgcanvas.append("g").selectAll("text .tasks").data(yArr).enter().append("text")
     .attr("y", function (d, i) {
-      return startX + ((gridSize) * (i));// + textHeight;
+      return ((gridSize) * (i));// + textHeight;
     })
     .attr("x", function() { return tilePadding;})
     .attr("class", "axes-label")
