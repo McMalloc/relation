@@ -9,6 +9,7 @@ app.HeatmapView = Backbone.View.extend({
       this.currentParameter = "tasktime";
       this.setId = 1;
       this.diffView = false;
+      this.diffset = false;
       
       // replaces ERB-style template tags with mustache style template tags to avoid conflicts
       _.templateSettings = {
@@ -40,12 +41,14 @@ app.HeatmapView = Backbone.View.extend({
     diffmap: function(event) {
       this.diffView = true;
       var mapIdxs = event.target.dataset.action.split(" ");
-      var diffset = buildDiffMap(mapIdxs[0], mapIdxs[1]);
-      renderDiffMap(diffset);
+      buildDiffMap(mapIdxs[0], mapIdxs[1]);
+      buildScale();
+      renderDiffMap();
     },
   
     replaceSet: function(event) {
       this.diffView = false;
+      buildScale();
       this.setId = parseInt(event.target.dataset.action);
       replaceSet();
     },
