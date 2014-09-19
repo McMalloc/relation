@@ -16,7 +16,7 @@
           <label name="tasktime" class="btn btn-default active switch" data-action="tasktime" >
             <input type="radio" checked> task time
           </label>
-          <label class="btn btn-default switch" data-action="markercount marker">
+          <label class="btn btn-default marker-switch" data-action="all">
             <input type="radio" name="markercount marker"> marker count
           </label>
           <label class="btn btn-default switch" data-action="satisfaction">
@@ -42,7 +42,7 @@
           <div id="marker-button-bar" class="btn-group" data-toggle="buttons">
             {{ _.each(codes, function(code) { }}
             
-            <label class="btn btn-default switch" data-action="markercount {{= code }}" >
+            <label class="btn btn-default marker-switch" data-action="{{= code }}" >
               <input type="radio" name="{{= code }}"> {{= code }}
             </label>
             

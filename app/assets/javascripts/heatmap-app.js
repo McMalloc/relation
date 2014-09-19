@@ -9,6 +9,7 @@ app.HeatmapView = Backbone.View.extend({
       this.currentParameter = "tasktime";
       this.setId = 1;
       this.diffView = false;
+      this.markerView = false;
       this.diffset = false;
       
       // replaces ERB-style template tags with mustache style template tags to avoid conflicts
@@ -26,6 +27,7 @@ app.HeatmapView = Backbone.View.extend({
        ▲ ▲ ▲ ▲ ▲ ▲ ▲ ▲ ▲ ▲ ▲ ▲ ▲ ▲ ▲ ▲ ▲ ▲ ▲ ▲ ▲ ▲ ▲ ▲ ▲ ▲ ▲ ▲ ▲  */
     events: {
       "click .switch": "switch",
+      "click .marker-switch": "markerSwitch",
       "click .replaceSet": "replaceSet",
       "click .diff": "diffmap",
     },
@@ -52,18 +54,22 @@ app.HeatmapView = Backbone.View.extend({
       this.setId = parseInt(event.target.dataset.action);
       replaceSet();
     },
+    
+    markerSwitch: function(event) {
+      this.markerView = true;
+      this.toggleElement("#marker-button-bar", true);
+      this.currentParameter = event.target.dataset.action;
+      buildScale();
+      changeParameter();      
+    },
   
     switch: function(event) {
-      var eventAction = event.target.dataset.action.split(" ");
-      if (eventAction[0] == "markercount") {
-        this.toggleElement("#marker-button-bar", true);
-        this.currentParameter = eventAction[1] + "count";
-        changeParameter();
-      } else {
-        this.toggleElement("#marker-button-bar", false);   
-        this.currentParameter = eventAction[0];
-        changeParameter();
-      };
+      this.markerView = false;
+      this.toggleElement("#marker-button-bar", false);   
+      this.currentParameter = event.target.dataset.action;
+      buildDiffMap(1, 2);
+      buildScale();
+      changeParameter();
     },
       
     // Initial render function. D3 will take it from there

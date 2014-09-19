@@ -21,22 +21,43 @@ function initCanvas(width, height, container) {
 }
 
 function replaceSet() {
+
   app.renderSet = app.passes.where({prototype_id: heatmapView.setId});
   app.heatmaprects.data(app.renderSet)
     .transition()
     .style("fill", function (d) {
-      return d3.rgb(app.renderScale(d.get(heatmapView.currentParameter)));
+      if (heatmapView.markerView) {
+        return d3.rgb(app.renderScale(d.get("markercounts")[heatmapView.currentParameter]));
+      } else {
+        return d3.rgb(app.renderScale(d.get(heatmapView.currentParameter)));
+      };
     })
     .attr("title", function (d, i) {
-      return d.get(heatmapView.currentParameter);
+      if (heatmapView.markerView) {
+        return d.get("markercounts")[heatmapView.currentParameter];
+      } else {
+        return d.get(heatmapView.currentParameter);
+      };
     });
   app.heatmaplabels.data(app.renderSet)
-    .text(function(d){ return d.get(heatmapView.currentParameter); });
+    .text(function(d){ 
+      if (heatmapView.markerView) {
+        return d.get("markercounts")[heatmapView.currentParameter];
+      } else {
+        return d.get(heatmapView.currentParameter);
+      };
+    });
+  updateLegend();
 }
 
 function buildDiffMap(idA, idB) {
-  var setA = _.map(app.passes.where({prototype_id: parseInt(idA)}), function (m) { return m.get(heatmapView.currentParameter); });
-  var setB = _.map(app.passes.where({prototype_id: parseInt(idB)}), function (m) { return m.get(heatmapView.currentParameter); });
+  if (heatmapView.markerView) {
+    var setA = _.map(app.passes.where({prototype_id: parseInt(idA)}), function (m) { return m.get("markercounts")[heatmapView.currentParameter]; });
+    var setB = _.map(app.passes.where({prototype_id: parseInt(idB)}), function (m) { return m.get("markercounts")[heatmapView.currentParameter]; });    
+  } else {
+    var setA = _.map(app.passes.where({prototype_id: parseInt(idA)}), function (m) { return m.get(heatmapView.currentParameter); });
+    var setB = _.map(app.passes.where({prototype_id: parseInt(idB)}), function (m) { return m.get(heatmapView.currentParameter); });
+  };
   heatmapView.diffset = (_.map(_.zip(setA, setB), function(a) { return a[1]-a[0] }));
 }
 
@@ -56,16 +77,22 @@ function renderDiffMap() {
 }
 
 function changeParameter() {
-  buildScale();
   if (!heatmapView.diffView) {
     app.heatmaprects.transition().style("fill", function (d) {
-      return d3.rgb(app.renderScale(d.get(heatmapView.currentParameter))); // TODO: does not work for individual markers
+      if (heatmapView.markerView) {
+        return d3.rgb(app.renderScale(d.get("markercounts")[heatmapView.currentParameter]));
+      } else {
+        return d3.rgb(app.renderScale(d.get(heatmapView.currentParameter)));
+      };
     });
     app.heatmaplabels.text(function(d){ 
-      return d.get(heatmapView.currentParameter); 
+      if (heatmapView.markerView) {
+        return d.get("markercounts")[heatmapView.currentParameter];
+      } else {
+        return d.get(heatmapView.currentParameter);
+      };
     });
   } else {
-    buildDiffMap(1, 2);
     app.heatmaprects.data(heatmapView.diffset).transition().style("fill", function (d) {
       return d3.rgb(app.renderScale(d)); // TODO: does not work for individual markers
     });
@@ -78,14 +105,17 @@ function changeParameter() {
 
 function buildScale() {
   if (heatmapView.diffView) {
-    //var max = _.max(heatmapView.diffset);
-    //var min = _.min(heatmapView.diffset);
     var max = Math.max(Math.abs(_.max(heatmapView.diffset)), Math.abs(_.min(heatmapView.diffset)));
     var min = max*(-1);
     app.palette = colorbrewer[divergingColors][categories];
   } else {
-    var max = app.passes.max(function(m) {return m.get(heatmapView.currentParameter);}).get(heatmapView.currentParameter);
-    var min = app.passes.min(function(m) {return m.get(heatmapView.currentParameter);}).get(heatmapView.currentParameter);
+    if (heatmapView.markerView) {
+      var max = app.passes.max(function(m) {return m.get("markercounts")[heatmapView.currentParameter];}).get("markercounts")[heatmapView.currentParameter];
+      var min = app.passes.min(function(m) {return m.get("markercounts")[heatmapView.currentParameter];}).get("markercounts")[heatmapView.currentParameter];    
+    } else {
+      var max = app.passes.max(function(m) {return m.get(heatmapView.currentParameter);}).get(heatmapView.currentParameter);
+      var min = app.passes.min(function(m) {return m.get(heatmapView.currentParameter);}).get(heatmapView.currentParameter);
+    };
     app.palette = colorbrewer[colors][categories];
   }
   app.mapper = d3.scale.quantize()
@@ -110,7 +140,7 @@ function updateLegend() {
 }
 
 function renderLegend(nVert, nHor, offset) {
-  var barHeight = (nVert*gridSize)/app.palette.length;
+  var barHeight = (nVert*gridSize)/Math.min(app.palette.length, app.mapper.domain()[1]); // TODO incomplete
   
   app.legend = app.svgcanvas.append("g").selectAll("g").data(app.palette).enter().append("g") 
     .attr("transform", function(d, i) {
@@ -129,7 +159,8 @@ function renderLegend(nVert, nHor, offset) {
   app.legendlabels = app.legend.append("text")
     .attr("transform", "translate(40,15)")
     .text( function(d, i) {
-      return parseInt(app.mapper.invertExtent(i-1)[0]);
+      console.log(app.mapper.invertExtent(i));
+      return parseInt(app.mapper.invertExtent(i));
     });
 }
 
