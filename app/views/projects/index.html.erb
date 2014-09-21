@@ -1,0 +1,23 @@
+<div class="row">
+  <div id="main" class="col-md-10 col-md-offset-1">
+    <h1>Projects</h1>
+
+    <% @projects.each do |project| -%>
+        <div class="project-listing">
+        <p>
+            <h2><%= project.name %></h2></i><span class="customer">for <%= project.customer %></span>
+        </p>
+        <p class="project-info">
+            Number of tasks: <%= project.tasks.count %>
+        </p>
+        <%= link_to(project) do %>
+          <span class="panel-link"></span>
+        <% end %>
+        </div>
+    <% end -%>
+  
+    <%= link_to "Add a project", {action: "new"}, {class: "btn btn-default"} %>
+  
+  </div>
+</div>
+  

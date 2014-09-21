@@ -1,7 +1,7 @@
 Rails.application.routes.draw do
   get 'heatmap' => 'render_view#heatmap'
   get 'mark' => 'mark_view#marking'
-  get 'create' => 'create_view#overview'
+  get 'populate' => 'create_view#overview'
   #get 'vis/create/new_task' => 'create_view#new_task', as: :new_task
   
   # fetch route. pass the controller and its attributes as query string parameters to get a json response
@@ -17,5 +17,6 @@ Rails.application.routes.draw do
     # delete 'tasks' => 'tasks#delete'
   end
   
+  resources :projects
   match 'markers/create', to: 'markers#create', via: 'post'
 end

@@ -17,8 +17,6 @@ app.TableView = Backbone.View.extend({
       };
       console.log("Fetching now...");
       var complete = _.invoke([app.tasks, app.participants, app.passes], 'fetch');
-      //var complete = _.invoke([app.tasks, app.participants], 'fetch');
-      // when all of them are complete
       $.when.apply($, complete).done(function() {
         console.log("Fetching complete.");
         thisview.render(); // not all views will render themselves, but this will
@@ -47,10 +45,10 @@ app.TableView = Backbone.View.extend({
   render: function(){
       $(".ajax-loader").css("visibility", "hidden");
       var tableTemplate = _.template(this.table_template.html(), {
-        tasks: app.tasks.pluck("name"), 
-        participants: app.participants.pluck("name"),
-        task_ids: app.tasks.pluck("id"),
-        participant_ids: app.participants.pluck("id")
+        tasks: app.tasks.where({project_id: app.project_id}).pluck("name"), 
+        participants: app.participants.where({project_id: app.project_id}).pluck("name"),
+        task_ids: app.tasks.where({project_id: app.project_id}).pluck("id"),
+        participant_ids: app.participants.where({project_id: app.project_id}).pluck("id")
       });
       $("#app-container").append(tableTemplate);
   },
@@ -127,8 +125,5 @@ $(document).ready( function() {
   app.tableview = new app.TableView({
     el: $("#app-container")
   });
-  //app.tableview.listenTo(app.Participants, 'add', app.tableview.render);
-  //app.tableview.listenTo(app.Tasks, 'add', app.tableview.render);
-  //app.tableview.listenTo(app.Passes, 'add', app.tableview.render);
   console.log("Instance created in: " + app.tableview.el.nodeName +" with the name "+ app.tableview.el.id);
 });
