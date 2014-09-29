@@ -17,8 +17,8 @@
 //= require_self
 //= require underscore
 //= require backbone
+//= require backbone-relational
 //= require backbone-forms
 //= require bootstrap
 //= require models
-//= require marking-init
 //= require marking-app

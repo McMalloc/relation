@@ -22,16 +22,25 @@ class PassController < ApplicationController
     render json: @passes, root: false
   end
   
+  def update
+    @pass = Pass.find(params[:id])
+    @pass.update_attributes(pass_params)
+    render json: @pass, root: false, status: :ok
+  end  
+  
   def show
     @pass = Pass.find(params[:id])
     render json: @pass, root: false
   end
   
   def create
-    Pass.create(pass_params)
+    @pass = Pass.create(pass_params)
+    puts "Creating"
+    puts @pass.to_yaml
+    render json: @pass, root: false
   end
   
   def pass_params
-    params.require(:pass).permit()
+    params.require(:pass).permit!
   end
 end

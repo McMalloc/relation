@@ -17,6 +17,7 @@ class ParticipantsController < ApplicationController
   
   def create
     @new_participant = Participant.create(participant_params)
+    puts @new_participant.to_yaml
     render json: @new_participant, root: false
   end
   
@@ -34,7 +35,7 @@ class ParticipantsController < ApplicationController
   end
   
   def participant_params
-    params.require(:participant).permit(:name, :persona_id)
+    params.require(:participant).permit!
   end
   
 end

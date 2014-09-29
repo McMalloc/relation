@@ -8,11 +8,13 @@ class MarkersController < ApplicationController
   respond_to :json
   
   def create
-    respond_with Marker.create(params[marker_params])
+    @marker = Marker.create(marker_params)
+    puts @marker.to_yaml
+    render json: @marker, root: false
   end
   
   def marker_params
-    params.require(:marker).permit(:code, :severity, :position, :pass_id)
+    params.require(:marker).permit!
   end
   
   def fetchCounts 

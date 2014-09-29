@@ -17,9 +17,11 @@
 //= require_self
 //= require underscore
 //= require backbone
+//= require backbone-relational
 //= require backbone-forms
 //= require bootstrap
 //= require models
 //= require heatmap-app
 //= require rendering
 //= require heatmap-init
+//= require simple_statistics

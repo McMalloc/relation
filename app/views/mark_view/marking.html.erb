@@ -4,12 +4,20 @@
   <div id="main" class="col-md-10 col-md-offset-1">
     <h1 class="app-heading">Code Assignment</h1>
     <div id="loading-bar" ></div>
+    <h2 id="headline">
+      <script type="text/template" id="headline-tmpl">
+        Task "{{= task }}" by {{= participant }}
+      </script>
+    </h2>
   </div>
 </div>
 <div class="row" id="app-container">
   <div class="col-md-7 col-md-offset-1">
     <%= video_tag "elephants-dream.webm", width:400, id: "videoframe", controls: true %>
     <div id="playbar"></div>
+  </div>
+  <div>
+    <button class="btn btn-default save">Save codes</button>
   </div>
   <div id="marker-buttons" class="col-md-3 col-md-offset-1">
     <script type="text/template" id="marker-button-tmpl">

@@ -1,4 +1,5 @@
 var app = app || {};
+app.pendingMarkers = []
 
 function renderPlaybar() {
   var width = $("#playbar").width();
@@ -26,31 +27,44 @@ function createMarker(code, severity, position, pass_id) {
     code: code,
     severity: severity,
     position: position,
-    pass_id: pass_id
+    pass_id: app.currentPassId
   });
   //marker.save(); // doesn't work shit
   app.markers.add(marker);
+  app.pendingMarkers.push(marker);
+  console.dir(app.pendingMarkers);
 }
 
 app.MarkerRecorderView = Backbone.View.extend({
-  initialize: function() {
+  initialize: function(options) {
     _.templateSettings = {
       interpolate : /\{\{=(.+?)\}\}/g,
       escape : /\{\{-(.+?)\}\}/g,
       evaluate: /\{\{(.+?)\}\}/g,
-    },
+      };
+    this.options = options;
     _.bindAll(this, 'render');
     this.render();
   },
   events: {
-    "click .create-marker": "createMarker"
+    "click .create-marker": "createMarker",
+    "click .save": "saveCodes"
   },
   render: function() {
-    var codes = ["ANGER", "ANNOYANCE", "LOST", "CONFUSION"];//app.markers.codes();
-    var severities = ["S0", "S1", "S2", "S3", "S4"]
-    var buttonTemplate = _.template($('#marker-button-tmpl').html(), {codes: codes, severities: severities});
-    $("#marker-buttons").append(buttonTemplate);
+    asyncRender();
   },
+  
+  saveCodes: function() {
+    console.log(app.currentPass.get("tasktime"));
+    app.passForm.commit();
+    console.log(app.currentPass.get("tasktime"));
+    app.currentPass.save();
+    var saved = _.invoke(app.pendingMarkers, "save");
+    if (saved) {
+      $("#app-container").append("<div class='success-msg'>Saved</div>").html();
+    }
+  },
+  
   createMarker: function(event) {
     var code = event.target.dataset.action.split(" ")[0];
     var severity = event.target.dataset.action.split(" ")[1];
@@ -66,7 +80,6 @@ function addMarkerTag(code, position, exists) {
   if (!exists) {
     var pixelPos = parseInt(playbarProgressD3.attr("width"));
   } else {
-    console.log(position);
     var pixelPos = position*(playbarD3.attr("width")/app.currentPass.get("tasktime"));
   };
   var codeColor = d3.rgb($("#" + code + "-label").css("background-color"));
@@ -92,6 +105,7 @@ function addMarkerTag(code, position, exists) {
       return pixelPos - (tagWidth/2);
     })
     .style("fill", function() {
+      console.log("fill "+ codeColor);
       return codeColor;
     })
     .attr("stroke-width", 1)
@@ -123,6 +137,39 @@ function updateProgressBar() {
   playbarProgressD3.attr("width", progressedWidth);
 }
 
+function asyncRender() {
+  var complete = _.invoke([app.tasks, app.participants, app.passes], 'fetch');
+    // when all of them are complete
+  $.when.apply($, complete).done(function () {
+        app.currentPass = app.passes.get(app.currentPassId);
+        var headlineTemplate = _.template($('#headline-tmpl').html(), {
+                                          task:  app.tasks.get(app.passes.get(app.currentPassId).get("task_id")).get("name"),
+                                          participant: app.participants.get(app.passes.get(app.currentPassId).get("participant_id")).get("name"),                                      
+                                          });
+        $("#headline").append(headlineTemplate);
+        var codes = ["ANGER", "ANNOYANCE", "LOST", "CONFUSION"];//app.markers.codes();
+        var severities = ["S0", "S1", "S2", "S3", "S4"]
+
+        var buttonTemplate = _.template($('#marker-button-tmpl').html(), 
+                                            {codes: codes, 
+                                             severities: severities, 
+                                            });
+        $("#marker-buttons").append(buttonTemplate);
+
+        app.passForm = new app.PassForm({
+          model: app.currentPass
+        }).render();
+        $("#marker-buttons").append(app.passForm.el);
+        renderPlaybar();
+        videoplayer = document.getElementById("videoframe");
+        videoplayer.controls = true; //false after implementing custom controls
+        videoplayer.addEventListener('timeupdate', updateProgressBar, false);
+        _.each(app.currentPass.get("markers"), function(e, i, a) {
+          addMarkerTag(e.code, e.position, 1);
+        });
+  });
+}
+
 $(document).ready( function() {
   
   markerRecorderView = new app.MarkerRecorderView({
@@ -130,21 +177,4 @@ $(document).ready( function() {
   });
   console.log("Instance created in: " + markerRecorderView.el.nodeName +" with the name "+ markerRecorderView.el.id);
   //markerRecorderView.render();
-  videoplayer = document.getElementById("videoframe");
-  videoplayer.controls = true; //false after implementing custom controls
-  videoplayer.addEventListener('timeupdate', updateProgressBar, false);
-  renderPlaybar();
-  app.currentPass = new app.PassModel({id: app.currentPassId});
-  console.log(app.currentPassId);
-  console.dir(app.currentPass);
-  app.currentPass.fetch({
-    success: function() {
-        _.each(app.currentPass.get("markers"), function(e, i, a) {
-          console.dir("--------------------------------------------------");
-          console.dir(a);
-          console.dir(e);
-          addMarkerTag(e.code, e.position, 1);
-        });
-    }
-  });
 });

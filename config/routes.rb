@@ -17,6 +17,6 @@ Rails.application.routes.draw do
     # delete 'tasks' => 'tasks#delete'
   end
   
-  resources :projects
-  match 'markers/create', to: 'markers#create', via: 'post'
+  resources :projects, :markers
+  # match 'markers/create', to: 'markers#create', via: 'post'
 end

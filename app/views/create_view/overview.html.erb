@@ -1,6 +1,7 @@
 <%= javascript_include_tag 'create' %>
 <%= javascript_tag do %>
   app.project_id = parseInt('<%= @project.id %>');
+  app.currentPrototypeId = parseInt('<%= @prototypeID %>');
 <% end %>
 
 
@@ -29,7 +30,12 @@
               <tr> 
                 <td class="task-cell"><<= tasks[task] >></td>
                 << for(var participant in participants) { >>
-                <td data-participantid="<<= participant_ids[participant] >>" data-taskid="<<= task_ids[task] >>" class="pass-cell"></td>
+                <td 
+                  data-participantid="<<= participant_ids[participant] >>" 
+                  data-taskid="<<= task_ids[task] >>" 
+                  class="pass-cell ">
+                </td>
+                
                 << } >>
               </tr>
             << } >> 
@@ -39,8 +45,9 @@
 
               </tr>
 
-          </table>
+          </table>       
         </script>
+<!--<class="pass-cell << if (_.where(passes, {pid: participant_ids[participant], tid: task_ids[task]})[0]["markercount"] == 0) { >> no-markers << } >>">-->
         <div class="modal fade" id="create-task-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
           <div class="modal-dialog">
             <div class="modal-content">
@@ -85,7 +92,7 @@
           </div>
         </div>
     
-    <%= link_to "Visualize", heatmap_path %>
+    <%= link_to "Visualize", heatmap_path(:project_id => @project.id) %>
     
   </div>
 </div>

@@ -26,6 +26,7 @@ $secondary-light: rgb(34, 94, 168);
   font-size: 12pt;
   padding: 3px 6px;
   font-family: 'Bitter', serif;
+  transition: background-color 0.1s, color 0.1s, border-color 0.1s;
   
   &:hover {
     background-color: $primary;
@@ -70,11 +71,21 @@ h2 {
   font-size: 9pt;
 }
 
+.boxchart-label {
+  fill: #fff;
+  font-size: 18pt;
+  font-family: 'Raleway', sans-serif;
+}
+
 .heatmap-label {
   fill: #fff;
   font-size: 18pt;
   font-family: 'Raleway', sans-serif;
   fill-opacity: 0%;
+}
+
+.heatmap-label-bg {
+  fill-opacity: 0%;  
 }
 
 .persona-label {
@@ -129,6 +140,11 @@ h2 {
   tr {
     margin-bottom: 6px;
   }
+  
+  td {
+    min-width: 50px;
+    min-height: 50px;
+  }
 }
 
 .task-cell {
@@ -150,7 +166,12 @@ h2 {
     border: 1px solid $primary;
     border-radius: 2px;
   }
+  
 }
+
+.no-markers {
+    background-color: white;
+  }
 
 .add {
   padding: 5px;
@@ -198,4 +219,12 @@ h2 {
     font-family: 'Bitter', serif;
     font-size: 14pt;
   }
+}
+
+.success-msg {
+  font-family: 'Bitter', serif;
+  font-size: 28pt;
+  color: white;
+  transition-property: all;
+  background-color: $primary; 
 }

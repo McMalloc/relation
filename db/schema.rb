@@ -25,6 +25,7 @@ ActiveRecord::Schema.define(version: 20140721110147) do
   create_table "participants", force: true do |t|
     t.string   "name"
     t.integer  "persona_id"
+    t.integer  "project_id"
     t.datetime "created_at"
     t.datetime "updated_at"
   end
@@ -37,6 +38,7 @@ ActiveRecord::Schema.define(version: 20140721110147) do
     t.integer  "task_id"
     t.integer  "participant_id"
     t.integer  "prototype_id"
+    t.integer  "project_id"
     t.datetime "created_at"
     t.datetime "updated_at"
   end

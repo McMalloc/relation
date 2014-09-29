@@ -1,4 +1,8 @@
 <%= javascript_include_tag 'visualization' %>
+<%= javascript_tag do %>
+  app.project_id = parseInt('<%= @project.id %>');
+  app.default_prototype_id = parseInt('<%= @project.prototypes.first.id %>')
+<% end %>
 
 <div class="row">
   <div id="main" class="col-md-10 col-md-offset-1">
@@ -14,16 +18,16 @@
       <div id="buttonbar">
         <div class="btn-group" data-toggle="buttons">
           <label name="tasktime" class="btn btn-default active switch" data-action="tasktime" >
-            <input type="radio" checked> task time
+            <input type="radio" checked> <i class="fa fa-clock-o"></i>&ensp;Task Time
           </label>
           <label class="btn btn-default marker-switch" data-action="all">
-            <input type="radio" name="markercount marker"> marker count
+            <input type="radio" name="markercount marker"><i class="fa fa-tags"></i>&ensp;Marker Count
           </label>
           <label class="btn btn-default switch" data-action="satisfaction">
-            <input type="radio" name="satisfaction"> satisfaction
+            <input type="radio" name="satisfaction"><i class="fa fa-smile-o"></i>&ensp; Satisfaction
           </label>
           <label class="btn btn-default switch" data-action="completed">
-            <input type="radio" name="completed"> completed
+            <input type="radio" name="completed"><i class="fa fa-check-circle-o"></i>&ensp; Completed
           </label>
         </div>
         <div class="btn-group" data-toggle="buttons">
@@ -34,7 +38,15 @@
             <input type="radio" name="set"> Prototype 2
           </label>
           <label class="btn btn-default diff" data-action="1 2">
-            <input type="radio" name="compare"> Compare 1 and 2
+            <input type="radio" name="compare"><i class="fa fa-bolt"></i>&ensp; Compare
+          </label>
+        </div>
+        <div class="btn-group" data-toggle="buttons" style="float:right;">
+          <label class="btn btn-default changeView active" data-action="emp">
+            <input type="radio" name="emp" checked><i class="fa fa-stop"></i>&ensp;Empirical
+          </label>
+          <label class="btn btn-default changeView" data-action="stat">
+            <input type="radio" name="stat"><i class="fa fa-bar-chart"></i>&ensp;Statistical
           </label>
         </div>
         
