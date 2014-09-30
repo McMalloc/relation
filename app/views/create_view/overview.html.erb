@@ -1,7 +1,8 @@
 <%= javascript_include_tag 'create' %>
 <%= javascript_tag do %>
   app.project_id = parseInt('<%= @project.id %>');
-  app.currentPrototypeId = parseInt('<%= @prototypeID %>');
+  app.prototype_ids = <%= @prototype_ids %>;
+  app.currentP = 0;
 <% end %>
 
 

@@ -6,7 +6,7 @@ app.HeatmapView = Backbone.View.extend({
   initialize: function () {
     _.bindAll(this, 'render'); // fixes loss of context for 'this' within methods with Underscore method  
     this.currentParameter = "tasktime";
-    this.setId = 1,//app.default_prototype_id;
+    this.setId = app.prototype_ids[0];
     this.viewMode = "emp";
     this.markerView = false;
     this.diffset = false;
@@ -59,23 +59,24 @@ app.HeatmapView = Backbone.View.extend({
   diffmap: function (event) {
     this.viewMode = "diff"
     var mapIdxs = event.target.dataset.action.split(" ");
-    buildDiffMap(mapIdxs[0], mapIdxs[1]);
+    buildDiffMap(parseInt(mapIdxs[0]), parseInt(mapIdxs[1]));
     buildScale();
     renderDiffMap();
   },
 
   replaceSet: function (event) {
-    this.viewMode = "emp"
+    //this.viewMode = "emp"
     buildScale();
     this.setId = parseInt(event.target.dataset.action);
     replaceSet();
+    changeParameter();
   },
 
   markerSwitch: function (event) {
     this.markerView = true
     this.toggleElement("#marker-button-bar", true);
     this.currentParameter = event.target.dataset.action;
-    if (this.viewMode=="diff") {buildDiffMap(1, 2);}
+    if (this.viewMode=="diff") {buildDiffMap(app.prototype_ids[0], app.prototype_ids[1]);}
     buildScale();
     changeParameter();
   },
@@ -84,7 +85,7 @@ app.HeatmapView = Backbone.View.extend({
     this.markerView = false
     this.toggleElement("#marker-button-bar", false);
     this.currentParameter = event.target.dataset.action;
-    if (this.viewMode=="diff") {buildDiffMap(1, 2);}
+    if (this.viewMode=="diff") {buildDiffMap(app.prototype_ids[0], app.prototype_ids[1]);}
     buildScale();
     changeParameter();
   },
@@ -143,12 +144,12 @@ function calculateStatistics() {
               case "tasktime": 
                 app.statistics[i][task.get("id")][parameter] = {
                   mean: ss.geometric_mean(utilpluck(parameter, i, task.get("id"))),
-                  interval: 1.5 //TODO INSERT CORRECT
+                  interval: ss.standard_deviation(utilpluck(parameter, i, task.get("id"))) / Math.sqrt(utilpluck(parameter, i, task.get("id")).length)
                 }; break;
               case "satisfaction": 
                 app.statistics[i][task.get("id")][parameter] = {
                   mean: ss.mean(utilpluck(parameter, i, task.get("id"))),
-                  interval: 1.2
+                  interval: ss.standard_deviation(utilpluck(parameter, i, task.get("id"))) / Math.sqrt(utilpluck(parameter, i, task.get("id")).length)
                 }; break;
           }});
       

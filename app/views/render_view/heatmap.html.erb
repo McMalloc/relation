@@ -1,9 +1,8 @@
 <%= javascript_include_tag 'visualization' %>
 <%= javascript_tag do %>
   app.project_id = parseInt('<%= @project.id %>');
-  app.default_prototype_id = parseInt('<%= @project.prototypes.first.id %>')
+  app.prototype_ids = <%= @prototype_ids %>;
 <% end %>
-
 <div class="row">
   <div id="main" class="col-md-10 col-md-offset-1">
 
@@ -31,13 +30,24 @@
           </label>
         </div>
         <div class="btn-group" data-toggle="buttons">
-          <label class="btn btn-default replaceSet active" data-action="1">
-            <input type="radio" name="set" checked> Prototype 1
+          <label class="btn btn-default replaceSet active" data-action="<%= @project.prototypes.first.id %>">
+            <input type="radio" name="set" checked> 
+            <% if @project.prototypes.first.moniker.empty? %>
+              Prototype 1
+            <% else %>
+              <%= @project.prototypes.first.moniker %>
+            <% end %>
           </label>
-          <label class="btn btn-default replaceSet" data-action="2">
-            <input type="radio" name="set"> Prototype 2
+          <label class="btn btn-default replaceSet" data-action="<%= @project.prototypes.second.id %>">
+            <input type="radio" name="set"> 
+            <% if @project.prototypes.second.moniker.empty? %>
+              Prototype 2
+            <% else %>
+              <%= @project.prototypes.second.moniker %>
+            <% end %>  
           </label>
-          <label class="btn btn-default diff" data-action="1 2">
+          <% embed = "#{@project.prototypes.first.id} #{@project.prototypes.second.id}" %>
+          <label class="btn btn-default diff" data-action="<%= embed %>">
             <input type="radio" name="compare"><i class="fa fa-bolt"></i>&ensp; Compare
           </label>
         </div>

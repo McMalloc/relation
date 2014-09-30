@@ -29,7 +29,9 @@ class PassController < ApplicationController
   end  
   
   def show
-    @pass = Pass.find(params[:id])
+    puts "Pass-show"
+    puts params.to_yaml
+    @pass = Pass.find(params[:pass_id])
     render json: @pass, root: false
   end
   

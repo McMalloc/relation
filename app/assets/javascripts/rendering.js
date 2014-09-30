@@ -3,7 +3,7 @@ var app = app || {};
 var gridSize = 48;
 var marginTop = 48;
 var tilePadding = 1;
-var categories = 9;
+var categories = 5;
 var colors = "YlGnBu";
 var divergingColors = "PiYG";
 app.svgcanvas = null;
@@ -55,11 +55,11 @@ function buildDiffMap(idA, idB) {
   var setA = [];
   var setB = [];
   if (heatmapView.markerView) {
-      setA = _.map(app.passes.where({prototype_id: parseInt(idA)}), function (m) { return m.get("markercounts")[heatmapView.currentParameter]; });
-      setB = _.map(app.passes.where({prototype_id: parseInt(idB)}), function (m) { return m.get("markercounts")[heatmapView.currentParameter]; }); 
+      setA = _.map(app.passes.where({prototype_id: idA}), function (m) { return m.get("markercounts")[heatmapView.currentParameter]; });
+      setB = _.map(app.passes.where({prototype_id: idB}), function (m) { return m.get("markercounts")[heatmapView.currentParameter]; }); 
   } else {
-      setA = _.map(app.passes.where({prototype_id: parseInt(idA)}), function (m) { return m.get(heatmapView.currentParameter); });
-      setB = _.map(app.passes.where({prototype_id: parseInt(idB)}), function (m) { return m.get(heatmapView.currentParameter); });
+      setA = _.map(app.passes.where({prototype_id: idA}), function (m) { return m.get(heatmapView.currentParameter); });
+      setB = _.map(app.passes.where({prototype_id: idB}), function (m) { return m.get(heatmapView.currentParameter); });
   };
   heatmapView.diffset = (_.map(_.zip(setA, setB), function(a) { return a[1]-a[0] }));
 }
@@ -106,14 +106,16 @@ function changeParameter() {
       });
       break;
     case "stat":
-      var set = _.pluck(app.statistics[1], heatmapView.currentParameter);
+      var set = _.pluck(app.statistics[heatmapView.setId], heatmapView.currentParameter);
       var cWidth = $("#app-container").width() - gridSize;
       var scaled = (heatmapView.currentParameter=="tasktime" || heatmapView.currentParameter=="satisfaction");
       if (scaled) {
-        var scale = d3.scale.linear()
-          .domain([_.min(set, function(m){return m.mean}).mean, _.max(set, function(m){return m.mean}).mean])
+        var scale = d3.scale.linear() // TODO: should be log...
+          .domain([0, _.max(set, function(m){return m.mean}).mean + _.max(set, function(m){return m.interval}).interval])
           .range([0, cWidth]);
+        app.testsc = scale;
       };
+      
       app.boxchart.data(set)    
         .attr("width", function(d, i) {
           return 0;
@@ -134,8 +136,13 @@ function changeParameter() {
           };
         })
         .attr("width", function(d, i) {
-          return cWidth*(d.interval*2);
+          if (scaled) {
+            return scale(d.interval*2);
+          } else {
+            return cWidth*(d.interval*2);
+          };
         });
+      
       app.boxchartlabels.data(set)
       .attr("x", function(d, i) {
           if (scaled) {
@@ -146,7 +153,7 @@ function changeParameter() {
       })
       .text(function(d, i) {
           if (scaled) {
-            return parseInt(d.mean-d.interval) + "% -- " + parseInt(d.mean+d.interval) + "%"
+            return parseInt(d.mean-d.interval) + " -- " + parseInt(d.mean+d.interval)
           } else {
             return parseInt(100*(d.mean-d.interval)) + "% -- " + parseInt(100*(d.mean+d.interval)) + "%"
           };        
@@ -322,7 +329,7 @@ function renderHeatmap() {
   };
 
 function renderBoxChart() {
-  var cWidth = $("#app-container").width();
+  var cWidth = 500;//$("#app-container").width();
   var set = _.pluck(app.statistics[1], heatmapView.currentParameter);
   
   app.boxchart = app.svgcanvas.append("g").selectAll("rect").data(set).enter().append("rect")
@@ -349,7 +356,11 @@ function renderBoxChart() {
       return gridSize*(i)+tilePadding + (2.8*gridSize);
     })
     .text(function(d, i) {
-      return parseInt((d.mean-d.interval)*100) + "% -- " + parseInt((d.mean+d.interval)*100) + "%"
+      if (heatmapView.currentParameter == "tasktime") {
+        return parseInt((d.mean-d.interval)) + "s -- " + parseInt((d.mean+d.interval)) + "s"
+      } else {
+        return parseInt((d.mean-d.interval)*100) + "% -- " + parseInt((d.mean+d.interval)*100) + "%"
+      }
     })
     .attr("class", "boxchart-label");
 }

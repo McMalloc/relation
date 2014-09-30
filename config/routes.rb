@@ -7,8 +7,9 @@ Rails.application.routes.draw do
   # fetch route. pass the controller and its attributes as query string parameters to get a json response
   # http://{root}/vis/fetch/pass?project_id=all&prototype_id=1&task_id=all&participant_id=all
   get 'fetch/:action/:controller/'
-  get 'passes/index' => 'pass#index'
+  # get 'passes/index' => 'pass#index'
   get 'overview' => 'project#overview'
+  # match '/pass/update' => 'pass#update', :as => :update_pass, :via => :patch
   
   # Backbone.sync routes
   scope '/sync' do

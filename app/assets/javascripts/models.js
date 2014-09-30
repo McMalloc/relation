@@ -19,7 +19,7 @@ app.Tasks = Backbone.Collection.extend({
   },
   url: 'sync/tasks',
   //url: 'tasks.json',
-  of: 'participants'
+  of: 'tasks'
 });
 
 app.TaskForm = Backbone.Form.extend();
@@ -68,7 +68,7 @@ app.Passes = Backbone.Collection.extend({
   assignCodes: function() {
     this.assignedCodes = _.uniq(_.flatten(this.pluck("markers")));
   },
-  url: function(m) {
+  url: function() {
     return 'sync/pass/'; 
   },
   //urlRoot: 'sync/pass'

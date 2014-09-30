@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140721110147) do
+ActiveRecord::Schema.define(version: 20140929134347) do
 
   create_table "markers", force: true do |t|
     t.string   "code"
@@ -41,6 +41,10 @@ ActiveRecord::Schema.define(version: 20140721110147) do
     t.integer  "project_id"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.string   "recording_file_name"
+    t.string   "recording_content_type"
+    t.integer  "recording_file_size"
+    t.datetime "recording_updated_at"
   end
 
   create_table "personas", force: true do |t|

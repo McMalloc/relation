@@ -5,6 +5,7 @@ class Pass < ActiveRecord::Base
   belongs_to :project
   has_many :markers
   has_one :recording
+  has_attached_file :recording
   
   def marker_count
     Marker.where(pass_id: self.id).count

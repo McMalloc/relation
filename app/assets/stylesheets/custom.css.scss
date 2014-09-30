@@ -196,6 +196,16 @@ h2 {
   z-index: 1;
 }   
 
+form {
+  font-family: 'Bitter', serif;
+  font-size: 12pt;
+  color: black;
+  
+  label {
+    margin-top: 12px;
+  }
+}
+
 .project-listing {
   
   border-bottom: 1px dotted $primary;

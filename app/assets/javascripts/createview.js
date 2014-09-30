@@ -32,11 +32,14 @@ app.TableView = Backbone.View.extend({
   },
   
   editPassView: function(event) {
+    console.log("edit pass!");
+    console.log(event.target.dataset.taskid, event.target.dataset.participantid);
     var selectedPass = app.passes.where({
       task_id: parseInt(event.target.dataset.taskid),
       participant_id: parseInt(event.target.dataset.participantid),
-      prototype_id: app.currentPrototypeId
+      prototype_id: app.prototype_ids[app.currentP]
     });
+    console.dir(selectedPass);
     window.location.href = 'mark?pass_id=' + selectedPass[0].get("id");
   },
   
@@ -69,16 +72,14 @@ app.TableView = Backbone.View.extend({
   },
   
   submit: function() {
-    console.log("submit!");
     this.currentForm.commit();
     this.currentModel.save({}, {
       success: function() {
-        console.log("wrote to database");
+        app.tableview.updatePasses();
         app.tableview.update();
       }
     });
     this.currentForm.el.remove();
-    this.updatePasses();
   },
   
   newParticipant: function() {
@@ -87,7 +88,6 @@ app.TableView = Backbone.View.extend({
       persona: "",
       project_id: app.project_id
     });
-    console.dir(participant);
     var form = new app.ParticipantForm({
       model: participant
     }).render();
@@ -116,27 +116,28 @@ app.TableView = Backbone.View.extend({
     switch (this.currentModel.collection.of) {
       case "participants":
         _.each(app.tasks.where({project_id: app.project_id}), function(task) {
-          app.passes.create(
+          var pass = app.passes.create(
             {
               participant_id: app.tableview.currentModel.get("id"),
               task_id: task.get("id"),
-              prototype_id: app.currentPrototypeId, //TODO gather this info automatically
+              prototype_id: app.prototype_ids[app.currentP], 
               project_id: app.project_id
             }
           );
+          pass.save();
         });
         break;
       case "tasks":
-        _.each(app.participants.where({project_id: app.project_id}), function(participants) {
-          console.dir(app.participants.where({project_id: app.project_id}));
-          app.passes.create(
+        _.each(app.participants.where({project_id: app.project_id}), function(participant) {
+          var pass = app.passes.create(
             {
               task_id: app.tableview.currentModel.get("id"),
               participant_id: participant.get("id"),
-              prototype_id: app.currentPrototypeId, //TODO gather this info automatically
+              prototype_id: app.prototype_ids[app.currentP],
               project_id: app.project_id
             }
           );
+          pass.save();
         });
         break;
     };

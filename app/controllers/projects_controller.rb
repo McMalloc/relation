@@ -12,8 +12,10 @@ class ProjectsController < ApplicationController
     puts @project.to_yaml
     respond_to do |format|
       if @project.save
-        @prototype = Prototype.new(project_id: @project.id)
-        @prototype.save
+        @prototype1 = Prototype.new(project_id: @project.id, moniker: "")
+        @prototype2 = Prototype.new(project_id: @project.id, moniker: "")
+        @prototype1.save
+        @prototype2.save
         format.html { redirect_to action: "index" }
       else
         format.html { render action: "new" }
