@@ -29,9 +29,18 @@ app.HeatmapView = Backbone.View.extend({
     "click .marker-switch": "markerSwitch",
     "click .replaceSet": "replaceSet",
     "click .diff": "diffmap",
-    "click .changeView": "changeView"
+    "click .changeView": "changeView",
+    "click .toggleColor": "toggleColor"
   },
 
+  toggleColor: function() {
+    if (colors=="YlGnBu") {
+      colors = "Greys"; buildScale(); changeParameter();
+    } else {
+      colors = "YlGnBu"; buildScale(); changeParameter();
+    };
+  },
+  
   toggleElement: function (element, visible) {
     if (visible) {
       $(element).css("visibility", "visible");
@@ -65,7 +74,9 @@ app.HeatmapView = Backbone.View.extend({
   },
 
   replaceSet: function (event) {
-    //this.viewMode = "emp"
+    if (this.viewMode=="diff") { 
+      this.viewMode = "emp"
+    };
     buildScale();
     this.setId = parseInt(event.target.dataset.action);
     replaceSet();
