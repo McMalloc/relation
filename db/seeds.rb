@@ -65,11 +65,11 @@ end
     (rand(40..80)) / 100.0
     ]
   marker_arr = [
-    "ANGER",
+    "PURCHASE-BUTTON",
     "IRRITATION",
     "LOST",
-    "CONFUSION",
-    "ANNOYANCE"
+    "WRONG",
+    "CART-VIEW"
     ]
   participants_arr = [
     "Sophia", "Phillipp", "Karol", "Christian", "Mathias", "Stefanie", "Thorsten", 
@@ -89,8 +89,8 @@ end
 
   project = Project.create name: "Redesign E-Mail-Client-Oberfläche", customer: "SW Holding GmbH"
   
-  pA = project.prototypes.create moniker: "Klassisch"
-  pB = project.prototypes.create moniker: "Gewagt"
+  pA = project.prototypes.create moniker: "Prototype A"
+  pB = project.prototypes.create moniker: "Prototype B"
     
   tasks_arr.each do |tsk|
     project.tasks.create name: tsk
@@ -126,7 +126,7 @@ end
           task_id: t.id,
           participant_id: p.id,
           sum: passSum,
-          tasktime: tt+rand(-60..10), 
+          tasktime: tt+rand(-60..40), 
           satisfaction: compl ? passSat : passSat*0.6, 
           completed: compl
         )

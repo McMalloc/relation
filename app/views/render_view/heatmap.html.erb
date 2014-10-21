@@ -6,7 +6,6 @@
 <div class="row">
   <div id="main" class="col-md-10 col-md-offset-1">
 
-    <h1 class="app-heading">Heatmap</h1>
     <div id="loading-bar" ></div>
     <h2>Color-coded visualization of usability test data</h2>
   </div>
@@ -52,10 +51,21 @@
           </label>
         </div>
         
-        <div class="btn btn-default" style="margin-left: 100px;">
-          <label class="btn btn-secondary toggleColor"><i class="fa fa-paint-brush"></i>&ensp;Greyscale</label>
+<!--        Color pallette mapping-->
+        <div id="pallette-button-bar" class="btn-group" data-toggle="buttons" style="margin-left:50px;">
+          <i class="fa fa-paint-brush"></i>&ensp;
+          <label class="btn btn-default toggleColor" data-action="gray"> gray
+            <input type="radio" name="gray" checked> 
+          </label>
+          <label class="btn btn-default toggleColor" data-action="YlGnBu"> chill
+            <input type="radio" name="YlGnBu">
+          </label>
+          <label class="btn btn-default toggleColor" data-action="YlOrBr"> warm
+            <input type="radio" name="YlOrBr">
+          </label>
         </div>
         
+<!--        View Modification-->
         <div class="btn-group" data-toggle="buttons" style="float:right;">
           <label class="btn btn-default changeView active" data-action="emp">
             <input type="radio" name="emp" checked><i class="fa fa-stop"></i>&ensp;Empirical
@@ -69,8 +79,8 @@
           <div id="marker-button-bar" class="btn-group" data-toggle="buttons">
             {{ _.each(codes, function(code) { }}
             
-            <label class="btn btn-default marker-switch" data-action="{{= code }}" >
-              <input type="radio" name="{{= code }}"> {{= code }}
+            <label class="btn btn-default marker-switch {{= code }}" data-action="{{= code }}" >
+              <input type="checkbox" name="{{= code }}"> {{= code }}
             </label>
             
             {{ }); }}

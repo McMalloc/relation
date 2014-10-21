@@ -14,7 +14,7 @@ class PassSerializer < ActiveModel::Serializer
   
   def markercounts
     if object.markers then
-      codes = ["ANGER", "LOST", "IRRITATION", "CONFUSION", "ANNOYANCE"]
+      codes = ["WRONG", "IRRITATION", "LOST", "CART-VIEW", "PURCHASE-BUTTON"]
       markercounts = {}
       markercounts["all"] = object.markers.count
       codes.each { |code| 

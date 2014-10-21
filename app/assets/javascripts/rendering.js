@@ -3,9 +3,11 @@ var app = app || {};
 var gridSize = 48;
 var marginTop = 48;
 var tilePadding = 1;
-var categories = 7;
+var categories = 9;
 var colors = "YlGnBu";
 var divergingColors = "PiYG";
+var nVert = 0;
+var nHor = 0;
 app.svgcanvas = null;
 app.renderScale = null;
 app.renderSet = {};
@@ -13,6 +15,7 @@ app.heatmap = {};
 app.lastParameter = "";
 app.mapper = {};
 app.palette = [];
+app.activeMarkers = {};
 
 function initCanvas(width, height, container) {
   app.svgcanvas = d3.select(container) //"#app-container"
@@ -51,6 +54,19 @@ function replaceSet() {
   updateLegend();
 }
 
+function buildSumSet(add) {
+  var setS = heatmapView.sumset;
+  var setA = [];
+  setA = _.map(app.passes.where({prototype_id: heatmapView.setId}), function (m) { return m.get("markercounts")[heatmapView.currentParameter]; }); 
+  heatmapView.sumset = (_.map(_.zip(setA, setS), function(a) { 
+    if (add) {
+      if( a[0] ) {return a[1]+1;} else {return a[1];}
+    } else {
+      if( a[0] ) {return a[1]-1;} else {return a[1];}
+    };
+  }));
+}
+
 function buildDiffMap(idA, idB) {
   var setA = [];
   var setB = [];
@@ -82,16 +98,23 @@ function renderDiffMap() {
 function changeParameter() {
   switch (heatmapView.viewMode) {
     case "emp":
-      app.heatmaprects.transition().style("fill", function (d) {
+      app.heatmaprects.transition().style("fill", function (d, i) {
         if (heatmapView.markerView) {
-          return d3.rgb(app.renderScale(d.get("markercounts")[heatmapView.currentParameter]));
+          var nActive = _.reduce(_.values(app.activeMarkers), function(memo, num){ return memo + num; }, 0) - 0;
+          //return d3.rgb(app.renderScale(d.get("markercounts")[heatmapView.currentParameter]));
+          if (heatmapView.sumset[i] == nActive) {
+            return d3.rgb(app.renderScale(1));
+          } else {
+            return d3.rgb(app.renderScale(0));
+          }
         } else {
           return d3.rgb(app.renderScale(d.get(heatmapView.currentParameter)));
         };
       });
-      app.heatmaplabels.text(function(d){ 
+      app.heatmaplabels.text(function(d, i){ 
         if (heatmapView.markerView) {
-          return d.get("markercounts")[heatmapView.currentParameter];
+          //return d.get("markercounts")[heatmapView.currentParameter];
+          return heatmapView.sumset[i];
         } else {
           return d.get(heatmapView.currentParameter);
         };
@@ -155,7 +178,8 @@ function changeParameter() {
           if (scaled) {
             return parseInt(d.mean-d.interval) + " -- " + parseInt(d.mean+d.interval)
           } else {
-            return parseInt(100*(d.mean-d.interval)) + "% -- " + parseInt(100*(d.mean+d.interval)) + "%"
+            parseInt((d.mean+d.interval)*100);
+            return parseInt(100*(d.mean-d.interval)) + "% -- " + _.min([100, parseInt((d.mean+d.interval)*100)]) + "%"
           };        
       });
       break;
@@ -174,13 +198,20 @@ function buildScale() {
       break;
     case "emp":
       if (heatmapView.markerView) {
-        max = app.passes.max(function(m) {return m.get("markercounts")[heatmapView.currentParameter];}).get("markercounts")[heatmapView.currentParameter];
-        min = app.passes.min(function(m) {return m.get("markercounts")[heatmapView.currentParameter];}).get("markercounts")[heatmapView.currentParameter];
+        max = 2;
+        //max = app.passes.max(function(m) {return m.get("markercounts")[heatmapView.currentParameter];}).get("markercounts")[heatmapView.currentParameter];
+        min = 0;
+        //min = app.passes.min(function(m) {return m.get("markercounts")[heatmapView.currentParameter];}).get("markercounts")[heatmapView.currentParameter];
       } else {
         max = app.passes.max(function(m) {return m.get(heatmapView.currentParameter);}).get(heatmapView.currentParameter);
         min = app.passes.min(function(m) {return m.get(heatmapView.currentParameter);}).get(heatmapView.currentParameter);
       };
-      app.palette = colorbrewer[colors][categories];
+      if (heatmapView.currentParameter == "satisfaction") {
+        var palette = _.compact(colorbrewer[colors][categories]);
+        app.palette = palette.reverse();
+      } else {
+        app.palette = colorbrewer[colors][categories];
+      };
       break;
   }
   
@@ -193,7 +224,6 @@ function buildScale() {
 }
 
 function updateLegend() {
-  
   app.legendfields.data(app.palette)
     .style("fill", function (d,i) {
       return d3.rgb(d);
@@ -205,7 +235,7 @@ function updateLegend() {
     });
 }
 
-function renderLegend(nVert, nHor, offset) {
+function renderLegend(offset) {
   var barHeight = (nVert*gridSize)/Math.min(app.palette.length, app.mapper.domain()[1]); // TODO incomplete
   
   app.legend = app.svgcanvas.append("g").selectAll("g").data(app.palette).enter().append("g") 
@@ -234,26 +264,37 @@ function renderHeatmap() {
   var hor = "participant_id";
   app.renderSet = app.passes.where({prototype_id: heatmapView.setId});
   buildScale();
-  var nHor = _.max(app.renderSet, function(pass) {
+  nHor = _.max(app.renderSet, function(pass) {
     return pass.get(hor);
   }).get(hor);
-  var nVert = _.max(app.renderSet, function(pass) {
+  nVert = _.max(app.renderSet, function(pass) {
     return pass.get(vert);
   }).get(vert);
   var cWidth = $("#app-container").width() - 70;
   gridSize = Math.floor(cWidth/(nHor+1));
-
+  
+  //this won't work when the task_id doesn't start with 1
   app.heatmap = app.svgcanvas.selectAll("g").data(app.renderSet).enter().append("g")
     .attr("transform", function(d, i) {
       return "translate("+ ((gridSize * (d.get(hor) + 0)) + tilePadding*3) +","+ ((gridSize * (d.get(vert) + 1)) + tilePadding) +")"; })
     .attr("title", function(d) { return d.get(heatmapView.currentParameter); })
     .on("mouseenter", function(d, i) { 
       d3.select("#Label-for-index-"+i).style("fill-opacity", "100%"); 
-      d3.select("#bg-for-index-"+i).style("fill-opacity", "70%"); 
+      d3.select("#bg-for-index-"+i).style("fill-opacity", "70%");
+    
+      d3.select("#participant-"+d.get(hor)).style("font-weight", "bold");
+      d3.select("#task-"+d.get(vert)).style("font-weight", "bold");      
+      d3.select("#participant-"+d.get(hor)).style("fill", d3.rgb(app.palette[5]));
+      d3.select("#task-"+d.get(vert)).style("fill", d3.rgb(app.palette[5]));
     })
     .on("mouseleave", function(d, i) { 
       d3.select("#Label-for-index-"+i).style("fill-opacity", "0%"); 
       d3.select("#bg-for-index-"+i).style("fill-opacity", "0%"); 
+    
+      d3.select("#participant-"+d.get(hor)).style("font-weight", "normal");
+      d3.select("#task-"+d.get(vert)).style("font-weight", "normal");   
+      d3.select("#participant-"+d.get(hor)).style("fill", "#000");
+      d3.select("#task-"+d.get(vert)).style("fill", "#000");
     });
   
   app.heatmaprects = app.heatmap.append("rect")
@@ -285,13 +326,17 @@ function renderHeatmap() {
   
   var participantNames = _.map(app.participants.where({project_id: app.project_id}), function(p) {return p.get("name")});
   var personaNames = _.map(app.participants.where({project_id: app.project_id}), function(p) {return p.get("persona_desc")});
-  var xArr = _.zip(participantNames, personaNames);
-  var yArr = _.map(app.tasks.where({project_id: app.project_id}), function(t) {return t.get("name")});
+  var participantsIds = _.map(app.participants.where({project_id: app.project_id}), function(p) {return p.get("id")});
+  var xArr = _.zip(participantNames, personaNames, participantsIds);
+  var taskNames = _.map(app.tasks.where({project_id: app.project_id}), function(t) {return t.get("name")});
+  var taskIds = _.map(app.tasks.where({project_id: app.project_id}), function(t) {return t.get("id")});
+  var yArr = _.zip(taskNames, taskIds);
   var textHeight = null;
   
   app.horAxesA = app.svgcanvas.selectAll("text .participants").data(xArr).enter().append("text")
     .text(function(d) { return d[0]; })
     .attr("class", "axes-label")
+    .attr("id", function(d) { return "participant-"+ d[2]; })
     .style("fill", function() { // dummy function to set textheight
       textHeight = this.getBBox().height;
     })
@@ -321,15 +366,16 @@ function renderHeatmap() {
     })
     .attr("x", function() { return tilePadding;})
     .attr("class", "axes-label")
-    .text(function(d) { return d; })
+    .attr("id", function(d) { return "task-"+ d[1]; })
+    .text(function(d) { return d[0]; })
     .call(wrap, gridSize, textHeight);
   
-  renderLegend(nVert, nHor, 30);
+  renderLegend(30);
   
   };
 
 function renderBoxChart() {
-  var cWidth = 500;//$("#app-container").width();
+  var cWidth = $("#app-container").width();
   var set = _.pluck(app.statistics[1], heatmapView.currentParameter);
   
   app.boxchart = app.svgcanvas.append("g").selectAll("rect").data(set).enter().append("rect")
@@ -347,6 +393,12 @@ function renderBoxChart() {
     })
     .style("fill", function(d,i) {return colorbrewer[colors][5][2]});  
   
+  app.boxScale = d3.scale.linear().domain([0,100]).range([0,cWidth]);
+  app.axis = d3.svg.axis().scale(app.boxScale).orient("top").ticks(20).tickSize(-(gridSize*nVert+tilePadding + (2*gridSize)));
+  app.boxAxis = app.svgcanvas.append("g")
+      .attr("class", "box-axis")
+      .attr("transform", "translate("+gridSize+"," + gridSize*1.9 + ")")
+      .call(app.axis);
   
   app.boxchartlabels = app.svgcanvas.append("g").selectAll("text").data(set).enter().append("text")
     .attr("x", function(d, i) {
@@ -359,7 +411,8 @@ function renderBoxChart() {
       if (heatmapView.currentParameter == "tasktime") {
         return parseInt((d.mean-d.interval)) + "s -- " + parseInt((d.mean+d.interval)) + "s"
       } else {
-        return parseInt((d.mean-d.interval)*100) + "% -- " + parseInt((d.mean+d.interval)*100) + "%"
+        parseInt((d.mean+d.interval)*100);
+        return parseInt((d.mean-d.interval)*100) + "% -- " + _.min([100, parseInt((d.mean+d.interval)*100)]) + "%"
       }
     })
     .attr("class", "boxchart-label");
