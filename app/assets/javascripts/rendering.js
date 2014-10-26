@@ -103,9 +103,9 @@ function changeParameter() {
           var nActive = _.reduce(_.values(app.activeMarkers), function(memo, num){ return memo + num; }, 0) - 0;
           //return d3.rgb(app.renderScale(d.get("markercounts")[heatmapView.currentParameter]));
           if (heatmapView.sumset[i] == nActive) {
-            return d3.rgb(app.renderScale(1));
+            return d3.rgb(app.renderScale(heatmapView.sumset[i]+1));
           } else {
-            return d3.rgb(app.renderScale(0));
+            return d3.rgb("#eee");//app.renderScale(0));
           }
         } else {
           return d3.rgb(app.renderScale(d.get(heatmapView.currentParameter)));
@@ -175,12 +175,12 @@ function changeParameter() {
           };
       })
       .text(function(d, i) {
-          if (scaled) {
-            return parseInt(d.mean-d.interval) + " -- " + parseInt(d.mean+d.interval)
-          } else {
-            parseInt((d.mean+d.interval)*100);
-            return parseInt(100*(d.mean-d.interval)) + "% -- " + _.min([100, parseInt((d.mean+d.interval)*100)]) + "%"
-          };        
+        console.log("switch to " + heatmapView.currentParameter);
+        switch(heatmapView.currentParameter) {
+          case "tasktime": return parseInt((d.mean-d.interval)) + "s ~ " + parseInt((d.mean+d.interval)) + "s"; break;
+          case "satisfaction": return (d.mean-d.interval).toFixed(2) + " ~ " + (d.mean+d.interval).toFixed(2); break;
+          default: return parseInt((d.mean-d.interval)*100) + "% ~ " + _.min([100, parseInt((d.mean+d.interval)*100)]) + "%"; break;
+        };       
       });
       break;
   };
@@ -198,10 +198,10 @@ function buildScale() {
       break;
     case "emp":
       if (heatmapView.markerView) {
-        max = 2;
         //max = app.passes.max(function(m) {return m.get("markercounts")[heatmapView.currentParameter];}).get("markercounts")[heatmapView.currentParameter];
-        min = 0;
+        max = app.passes.max(function(m) {return m.get("markercounts")["all"];}).get("markercounts")["all"];
         //min = app.passes.min(function(m) {return m.get("markercounts")[heatmapView.currentParameter];}).get("markercounts")[heatmapView.currentParameter];
+        min = app.passes.min(function(m) {return m.get("markercounts")["all"];}).get("markercounts")["all"] - 2;
       } else {
         max = app.passes.max(function(m) {return m.get(heatmapView.currentParameter);}).get(heatmapView.currentParameter);
         min = app.passes.min(function(m) {return m.get(heatmapView.currentParameter);}).get(heatmapView.currentParameter);
@@ -408,12 +408,12 @@ function renderBoxChart() {
       return gridSize*(i)+tilePadding + (2.8*gridSize);
     })
     .text(function(d, i) {
-      if (heatmapView.currentParameter == "tasktime") {
-        return parseInt((d.mean-d.interval)) + "s -- " + parseInt((d.mean+d.interval)) + "s"
-      } else {
-        parseInt((d.mean+d.interval)*100);
-        return parseInt((d.mean-d.interval)*100) + "% -- " + _.min([100, parseInt((d.mean+d.interval)*100)]) + "%"
-      }
+      console.log("switch to " + heatmapView.currentParameter);
+      switch(heatmapView.currentParameter) {
+        case "tasktime": return parseInt((d.mean-d.interval)) + "s ~ " + parseInt((d.mean+d.interval)) + "s"; break;
+        case "satisfaction": console.log("satisfaction"); return (d.mean-d.interval).toFixed(1) + "s ~ " + (d.mean+d.interval).toFixed(1) + "s"; break;
+        default: return parseInt((d.mean-d.interval)*100) + "% ~ " + _.min([100, parseInt((d.mean+d.interval)*100)]) + "%"; break;
+      };
     })
     .attr("class", "boxchart-label");
 }

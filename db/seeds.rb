@@ -101,7 +101,7 @@ end
   end
   
   participants_arr.each do |part|
-    Participant.create( name: part, persona_id: persona_distr[participants_arr.index(part)], project_id: 1 )
+    Participant.create( name: part, persona_id: persona_distr[participants_arr.index(part)] ) #, project_id: 1 )
   end
 
   Task.all.each do |t|
