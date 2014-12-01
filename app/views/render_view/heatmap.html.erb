@@ -19,7 +19,7 @@
             <input type="radio" checked> <i class="fa fa-clock-o"></i>&ensp;Task Time
           </label>
           <label class="btn btn-default marker-switch" data-action="all">
-            <input type="radio" name="markercount marker"><i class="fa fa-tags"></i>&ensp;Marker Count
+            <input type="radio" name="markercount marker"><i class="fa fa-tags"></i>&ensp;Marker Combos
           </label>
           <label class="btn btn-default switch" data-action="satisfaction">
             <input type="radio" name="satisfaction"><i class="fa fa-smile-o"></i>&ensp; Satisfaction
@@ -80,7 +80,7 @@
             {{ _.each(codes, function(code) { }}
             
             <label class="btn btn-default marker-switch {{= code }}" data-action="{{= code }}" >
-              <input type="checkbox" name="{{= code }}"> {{= code }}
+              <input type="checkbox" name="{{= code }}"> {{= code }} 
             </label>
             
             {{ }); }}

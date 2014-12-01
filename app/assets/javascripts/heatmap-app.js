@@ -143,7 +143,7 @@ function calculateStatistics() {
   app.statistics = {1: {}, 2: {}}; 
   var parameters = ["tasktime", "satisfaction"]; //, "completed"];
   //var markers = app.markers.codes();
-  var markers = ["WRONG", "IRRITATION", "LOST", "CART-VIEW", "PURCHASE-BUTTON", "completed"];
+  var markers = ["WRONG", "IRRITATION", "LOST", "INBOX-VIEW", "ADRESSBOOK", "completed"];
   
   app.tasks.each(function (task) {
     if (task.get("project_id") == app.project_id) {

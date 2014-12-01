@@ -16,7 +16,7 @@ class PassController < ApplicationController
     render json: @passes_by_query, root: false
     # find JSON definition in the serializer
   end
-  
+  @@data = File.read("public/passes.json")
   def index
     @passes = Pass.all
     render json: @passes, root: false

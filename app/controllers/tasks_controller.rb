@@ -5,7 +5,7 @@ class TasksController < ApplicationController
     # find JSON definition in the serializer
     # prepare for multiple projects
   end
-  
+  @@data = File.read("public/tasks.json")
   def index
     @tasks = Task.all
     render json: @tasks, root: false

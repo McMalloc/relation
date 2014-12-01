@@ -6,8 +6,11 @@ class ParticipantsController < ApplicationController
     # prepare for multiple projects
   end
   
+  @@data = File.read("public/participants.json")
+  
   def index
     @participants = Participant.all
+    
     render json: @participants, root: false
   end
   

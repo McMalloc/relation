@@ -147,7 +147,7 @@ function asyncRender() {
                                           participant: app.participants.get(app.passes.get(app.currentPassId).get("participant_id")).get("name"),                                      
                                           });
         $("#headline").append(headlineTemplate);
-        var codes = ["WRONG", "IRRITATION", "LOST", "CART-VIEW", "PURCHASE-BUTTON"];//app.markers.codes();
+        var codes = ["WRONG", "IRRITATION", "LOST", "INBOX-VIEW", "ADRESSBOOK"];//app.markers.codes();
         var severities = ["S0", "S1", "S2", "S3", "S4"]
 
         var buttonTemplate = _.template($('#marker-button-tmpl').html(), 

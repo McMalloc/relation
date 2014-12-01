@@ -240,7 +240,7 @@ function renderLegend(offset) {
   
   app.legend = app.svgcanvas.append("g").selectAll("g").data(app.palette).enter().append("g") 
     .attr("transform", function(d, i) {
-      return "translate("+ ((nHor*gridSize) + gridSize + 30) +","+ ((gridSize*2) + tilePadding + (i*barHeight)) +")";
+      return "translate("+ ((nHor*gridSize) + gridSize + 30) +","+ ((gridSize) + tilePadding + (i*barHeight)) +")";
     });
   
   app.legendfields = app.legend.append("rect")
@@ -276,7 +276,7 @@ function renderHeatmap() {
   //this won't work when the task_id doesn't start with 1
   app.heatmap = app.svgcanvas.selectAll("g").data(app.renderSet).enter().append("g")
     .attr("transform", function(d, i) {
-      return "translate("+ ((gridSize * (d.get(hor) + 0)) + tilePadding*3) +","+ ((gridSize * (d.get(vert) + 1)) + tilePadding) +")"; })
+      return "translate("+ ((gridSize * (d.get(hor) + 0)) + tilePadding*3) +","+ ((gridSize * (d.get(vert)))) +")"; })
     .attr("title", function(d) { return d.get(heatmapView.currentParameter); })
     .on("mouseenter", function(d, i) { 
       d3.select("#Label-for-index-"+i).style("fill-opacity", "100%"); 
@@ -322,7 +322,8 @@ function renderHeatmap() {
     .text(function(d){ return d.get(heatmapView.currentParameter); })
     .attr("transform", "translate(10, "+ (gridSize-10) +")") //can be done with x and y attributes
     .attr("class", "heatmap-label")
-    .attr("id", function(d, i) { return "Label-for-index-"+i; });
+    .attr("id", function(d, i) { return "Label-for-index-"+i; })
+    .style("font-size", parseInt(gridSize*0.4)+"px");
   
   var participantNames = _.map(app.participants.where({project_id: app.project_id}), function(p) {return p.get("name")});
   var personaNames = _.map(app.participants.where({project_id: app.project_id}), function(p) {return p.get("persona_desc")});
@@ -340,7 +341,7 @@ function renderHeatmap() {
     .style("fill", function() { // dummy function to set textheight
       textHeight = this.getBBox().height;
     })
-    .attr("y", function() { return (2*gridSize)-tilePadding-textHeight;})
+    .attr("y", function() { return (gridSize)-tilePadding-textHeight;})
     .attr("x", function (d, i) {
       return textHeight + (gridSize * (i + 0)) + gridSize;
     })
@@ -349,7 +350,7 @@ function renderHeatmap() {
     });
   
   app.horAxesB = app.svgcanvas.selectAll("text .personas").data(xArr).enter().append("text")
-    .attr("y", function() { return (2*gridSize)-tilePadding;})
+    .attr("y", function() { return (gridSize)-tilePadding;})
     .attr("x", function (d, i) {
       return textHeight + (gridSize * (i + 0)) + gridSize;
     })
@@ -362,7 +363,7 @@ function renderHeatmap() {
 
   app.vertAxes = app.svgcanvas.append("g").selectAll("text .tasks").data(yArr).enter().append("text")
     .attr("y", function (d, i) {
-      return ((gridSize) * (i)) - (gridSize/2) + tilePadding*3;// + textHeight;
+      return ((gridSize) * (i-1)) + 0.2*gridSize  ;// + textHeight; - (gridSize/2) + tilePadding*3
     })
     .attr("x", function() { return tilePadding;})
     .attr("class", "axes-label")
@@ -383,7 +384,7 @@ function renderBoxChart() {
       return gridSize+tilePadding + (cWidth*(d.mean-d.interval));
     })
     .attr("y", function(d, i) {
-      return gridSize*(i)+tilePadding + (2*gridSize);
+      return gridSize*(i)+tilePadding + (gridSize);
     })
     .attr("width", function(d, i) {
       return cWidth*(d.interval*2);
@@ -397,7 +398,7 @@ function renderBoxChart() {
   app.axis = d3.svg.axis().scale(app.boxScale).orient("top").ticks(20).tickSize(-(gridSize*nVert+tilePadding + (2*gridSize)));
   app.boxAxis = app.svgcanvas.append("g")
       .attr("class", "box-axis")
-      .attr("transform", "translate("+gridSize+"," + gridSize*1.9 + ")")
+      .attr("transform", "translate("+gridSize+"," + gridSize + ")")
       .call(app.axis);
   
   app.boxchartlabels = app.svgcanvas.append("g").selectAll("text").data(set).enter().append("text")
@@ -405,7 +406,7 @@ function renderBoxChart() {
       return gridSize+tilePadding + (cWidth*(d.mean-d.interval));
     })
     .attr("y", function(d, i) {
-      return gridSize*(i)+tilePadding + (2.8*gridSize);
+      return gridSize*(i)+tilePadding + (1.8*gridSize);
     })
     .text(function(d, i) {
       console.log("switch to " + heatmapView.currentParameter);
