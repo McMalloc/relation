@@ -11,6 +11,10 @@ $secondary-light: rgb(34, 94, 168);
   margin-bottom: 48px;
 }
 
+td {
+  padding-right: 1em;
+}
+
 #loading-bar {
   width: 0%;
   background-color: $primary;

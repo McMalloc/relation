@@ -1,7 +1,7 @@
 class MarkViewController < ApplicationController
   def marking
     @pass = Pass.find(params[:pass_id])
-    puts @pass.to_yaml
+    @codes = Codes.find()
     render 'marking'
   end
   

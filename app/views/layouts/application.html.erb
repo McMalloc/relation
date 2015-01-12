@@ -8,7 +8,9 @@
 </head>
 <body>
 <%= image_tag "ajax-loader.gif", class: "ajax-loader" %>
-<%= yield %>
+<div id="main" class="col-md-10 col-md-offset-1">
+  <%= yield %>
+</div>
   
 </body>
 </html>

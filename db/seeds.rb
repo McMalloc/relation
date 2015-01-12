@@ -50,9 +50,9 @@ end
     "Create an appointment in a shared calendar",
     "Export your address book",
     "Restore a deleted draft",
-    "Create a new IMAP account"#,
-    #"Create a new task for a colleague",
-    #"Add a domain to the spam black list"
+    "Create a new IMAP account",
+    "Create a new task for a colleague",
+    "Add a domain to the spam black list"
     ]
   tasks_difficulty = [
     (rand(20..40)) / 100.0,
@@ -72,12 +72,12 @@ end
     "INBOX-VIEW"
     ]
   participants_arr = [
-    "Sophia", "Phillipp", "Karol", "Christian", "Mathias", "Stefanie", "Thorsten"#, 
-    #"Leonie", "Pablo", "Peter", "Johannes", "Simone", "Junda", "Günther", "Hendrik", "Lars", "Astrid", "Allison"
+    "Sophia", "Phillipp", "Karol", "Christian", "Mathias", "Stefanie", "Thorsten", 
+    "Leonie", "Pablo", "Peter", "Johannes", "Simone", "Junda", "Günther", "Hendrik", "Lars", "Astrid", "Allison"
     ]
   participants_arr = [
-    "Peter", "Johannes", "Simone", "Junda", "Günther", "Hendrik", "Lars"#, 
-   #"Astrid", "Allison", "Sophia", "Phillipp", "Karol", "Christian", "Mathias", "Stefanie", "Thorsten", "Leonie", "Pablo"
+    "Peter", "Johannes", "Simone", "Junda", "Günther", "Hendrik", "Lars", 
+   "Astrid", "Allison", "Sophia", "Phillipp", "Karol", "Christian", "Mathias", "Stefanie", "Thorsten", "Leonie", "Pablo"
     ]
   persona_distr = [
     1,1,2,2,3,3,3,4,4,1,1,2,2,3,3,3,4,4
@@ -101,7 +101,7 @@ end
   end
   
   participants_arr.each do |part|
-    Participant.create( name: part, persona_id: persona_distr[participants_arr.index(part)], project_id: 1 )
+    Participant.create( name: part, persona_id: persona_distr[participants_arr.index(part)])#, project_id: 1 )
   end
 
   Task.all.each do |t|

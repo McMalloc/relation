@@ -11,7 +11,15 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140929134347) do
+ActiveRecord::Schema.define(version: 20150110122628) do
+
+  create_table "codes", force: true do |t|
+    t.string   "tag"
+    t.string   "description"
+    t.string   "color"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
 
   create_table "markers", force: true do |t|
     t.string   "code"
@@ -25,7 +33,6 @@ ActiveRecord::Schema.define(version: 20140929134347) do
   create_table "participants", force: true do |t|
     t.string   "name"
     t.integer  "persona_id"
-    t.integer  "project_id"
     t.datetime "created_at"
     t.datetime "updated_at"
   end
@@ -38,7 +45,6 @@ ActiveRecord::Schema.define(version: 20140929134347) do
     t.integer  "task_id"
     t.integer  "participant_id"
     t.integer  "prototype_id"
-    t.integer  "project_id"
     t.datetime "created_at"
     t.datetime "updated_at"
     t.string   "recording_file_name"

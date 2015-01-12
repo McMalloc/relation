@@ -1,4 +1,6 @@
 Rails.application.routes.draw do
+  resources :codes
+
   get 'heatmap' => 'render_view#heatmap'
   get 'mark' => 'mark_view#marking'
   get 'populate' => 'create_view#overview'
@@ -18,6 +20,6 @@ Rails.application.routes.draw do
     # delete 'tasks' => 'tasks#delete'
   end
   
-  resources :projects, :markers
+  resources :projects, :markers, :codes
   # match 'markers/create', to: 'markers#create', via: 'post'
 end
