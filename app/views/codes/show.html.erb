@@ -1,0 +1,19 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <strong>Tag:</strong>
+  <%= @code.tag %>
+</p>
+
+<p>
+  <strong>Description:</strong>
+  <%= @code.description %>
+</p>
+
+<p>
+  <strong>Color:</strong>
+  <%= @code.color %>
+</p>
+
+<%= link_to 'Edit', edit_code_path(@code) %> |
+<%= link_to 'Back', codes_path %>
